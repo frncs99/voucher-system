@@ -39,6 +39,8 @@ class CreateNewUser implements CreatesNewUsers
                 if (in_array("teams", config('jetstream.features'))) {
                     $this->createTeam($user);
                 }
+
+                $user->assignRole('User');
                 
                 Mail::to($user->email)->send(new WelcomeMail($user->name));
             });
