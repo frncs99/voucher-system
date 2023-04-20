@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\VoucherController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -33,3 +34,7 @@ Route::middleware([
         return Inertia::render('Dashboard');
     })->name('dashboard');
 });
+
+Route::get('/vouchers', [VoucherController::class, "index"])->name('vouchers-index')->middleware(['can:view-voucher']);
+Route::delete('/vouchers/{id}', [VoucherController::class, "destroy"])->name('vouchers-destroy')->middleware(['can:delete-voucher']);
+Route::get('/vouchers/create', [VoucherController::class, "create"])->name('vouchers-create')->middleware(['can:create-voucher']);

@@ -52,6 +52,11 @@ const logout = () => {
                                     Dashboard
                                 </NavLink>
                             </div>
+                            <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
+                                <NavLink :href="route('vouchers-index')" :active="route().current('vouchers-index')">
+                                    Vouchers
+                                </NavLink>
+                            </div>
                         </div>
 
                         <div class="hidden sm:flex sm:items-center sm:ml-6">
@@ -193,6 +198,9 @@ const logout = () => {
                     <div class="pt-2 pb-3 space-y-1">
                         <ResponsiveNavLink :href="route('dashboard')" :active="route().current('dashboard')">
                             Dashboard
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink :href="route('vouchers-index')" :active="route().current('vouchers-index')">
+                            Vouchers
                         </ResponsiveNavLink>
                     </div>
 

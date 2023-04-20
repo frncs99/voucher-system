@@ -1,5 +1,6 @@
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue';
+import BackButton from "@/Components/BackButton.vue";
 // import Welcome from '@/Components/Welcome.vue';
 </script>
 
@@ -7,7 +8,7 @@ import AppLayout from '@/Layouts/AppLayout.vue';
     <AppLayout title="Dashboard">
         <template #header>
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                DASHBOARD
+                <BackButton /> &nbsp; DASHBOARD
             </h2>
         </template>
 
