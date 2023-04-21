@@ -3,7 +3,6 @@ import AppLayout from "@/Layouts/AppLayout.vue";
 import BackButton from "@/Components/BackButton.vue";
 
 import Button from "@/Components/PrimaryButton.vue";
-import Link from "@/Components/NavLink.vue";
 import Pagination from "@/Components/Pagination.vue";
 import { router } from '@inertiajs/vue3';
 
@@ -33,19 +32,22 @@ const props = defineProps({
         type: Object,
         default: () => ({}),
     },
+    userId: {
+        type: Int32Array
+    },
 });
 
 const Toast = Swal.mixin({
-  toast: true,
-  position: 'top-end',
-  showConfirmButton: false,
-  timer: 5000,
-  timerProgressBar: true,
-  didOpen: (toast) => {
-    toast.addEventListener('mouseenter', Swal.stopTimer)
-    toast.addEventListener('mouseleave', Swal.resumeTimer)
-  }
-})
+    toast: true,
+    position: 'top-end',
+    showConfirmButton: false,
+    timer: 5000,
+    timerProgressBar: true,
+    didOpen: (toast) => {
+        toast.addEventListener('mouseenter', Swal.stopTimer)
+        toast.addEventListener('mouseleave', Swal.resumeTimer)
+    }
+});
 
 function destroy(id) {
     if (confirm("Are you sure you want to delete")) {
@@ -80,6 +82,32 @@ function checkLimit() {
 
     router.get(route('vouchers-create'));
 }
+
+function exportToExcel() {
+    let filename = '';
+    fetch(route('vouchers-export', { id: props.userId }))
+        .then((res) => {
+            let header = res.headers.get('Content-Disposition');
+            let parts = header.split(';');
+            filename = parts[1].split('=')[1];
+            return res.blob();
+        })
+        .then((blob) => {
+            const file = window.URL.createObjectURL(blob);
+            var a = document.createElement("a");
+            document.body.appendChild(a);
+            a.style = "display: none";
+            a.href = file;
+            a.download = filename;
+            a.click();
+            window.URL.revokeObjectURL(blob);
+        });
+
+    Toast.fire({
+        icon: 'success',
+        title: 'Vouchers exported successfully.'
+    });
+}
 </script>
 
 <template>
@@ -88,7 +116,6 @@ function checkLimit() {
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
                 <BackButton /> &nbsp; VOUCHERS
             </h2>
-            {{ message }}
         </template>
 
         <div class="py-12">
@@ -98,11 +125,10 @@ function checkLimit() {
                         <div class="p-6 bg-white border-b border-gray-200">
                             <div v-if="allowedToAdd" class="mb-2">
                                 <span v-if="group" style="float: right;">GROUP: {{ group.name }}</span>
-                                <!-- <span ref="voucherCreateBtn">
-                                    <Link :href="route('vouchers-create')" style="display: none;">
-                                    </Link>
-                                </span> -->
-                                <Button @click="checkLimit()">Add Voucher</Button>
+                                <Button class="mr-2" @click="checkLimit()">Add Voucher</Button>
+                            </div>
+                            <div v-else class="mb-2">
+                                <Button class="mr-2" @click="exportToExcel()">Export</Button>
                             </div>
                             <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
                                 <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">

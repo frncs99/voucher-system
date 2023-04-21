@@ -53,7 +53,7 @@ const logout = () => {
                                 </NavLink>
                             </div>
                             <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
-                                <NavLink :href="route('vouchers-index')" :active="route().current('vouchers-index')">
+                                <NavLink :href="route('vouchers-index')" :active="route().current('vouchers-index') || route().current('vouchers-create')">
                                     Vouchers
                                 </NavLink>
                             </div>
@@ -199,7 +199,7 @@ const logout = () => {
                         <ResponsiveNavLink :href="route('dashboard')" :active="route().current('dashboard')">
                             Dashboard
                         </ResponsiveNavLink>
-                        <ResponsiveNavLink :href="route('vouchers-index')" :active="route().current('vouchers-index')">
+                        <ResponsiveNavLink :href="route('vouchers-index')" :active="route().current('vouchers-index') || route().current('vouchers-create')">
                             Vouchers
                         </ResponsiveNavLink>
                     </div>

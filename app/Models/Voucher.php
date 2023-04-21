@@ -15,9 +15,14 @@ class Voucher extends Model
     protected $table = 'vouchers';
     protected $primaryKey = 'voucher_id';
 
+    protected $fillable = [
+        'user_id',
+        'code',
+    ];
+
     public function user()
     {
-        return $this->hasOne(User::class, 'user_id');
+        return $this->belongsTo(User::class);
     }
 
     protected function serializeDate(DateTimeInterface $date)

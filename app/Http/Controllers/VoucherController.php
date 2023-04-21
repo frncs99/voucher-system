@@ -2,20 +2,26 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\GroupAdmin;
-use App\Models\GroupMember;
-use App\Models\Voucher;
-use Error;
-use ErrorException;
-use Exception;
+use App\Http\Requests\VoucherRequest;
+use App\Interfaces\ExportVoucherInterface;
+use App\Services\VoucherService;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
-class VoucherController extends Controller
+class VoucherController extends Controller implements ExportVoucherInterface
 {
+    protected $modelService;
+
+    public function __construct(VoucherService $modelService)
+    {
+        $this->modelService = $modelService;
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -25,136 +31,54 @@ class VoucherController extends Controller
     {
         $userId = Auth::user()->id;
         $userType = Auth::user()->user_type;
+        
+        $allowedToAdd = false;
+        $allowedToDelete = false;
+        $showOwner = false;
+        $showGroup = false;
+        $addIsOnLimit = false;
 
         switch ($userType) {
             case 'user':
                 $allowedToAdd = true;
                 $allowedToDelete = true;
-                $showOwner = false;
-                $showGroup = false;
 
-                $group = GroupMember::select(
-                        'groups.name'
-                    )
-                    ->where('user_id', $userId)
-                    ->where('is_active', 1)
-                    ->join(
-                        'groups',
-                        'groups.group_id',
-                        '=',
-                        'group_members.group_id'
-                    )
-                    ->first();
+                $userGroup = $this->modelService->getUserGroup($userId);
+                $userVouchers = $this->modelService->getUserVoucher($userId);
 
-                $vouchers = Voucher::select(
-                        'vouchers.created_at',
-                        'vouchers.voucher_id',
-                        'vouchers.code',
-                    )
-                    ->where('vouchers.user_id', $userId)
-                    ->where('vouchers.deleted_at', null);
+                $vouchers = $userVouchers['vouchers'];
+                $addIsOnLimit = $userVouchers['limit'];
                 
-                if ($vouchers->count() >= 10) {
-                    $addIsOnLimit = true;
-                }
-
-                $vouchers = $vouchers->paginate(5);
                 break;
             case 'group_admin':
-                $allowedToAdd = false;
-                $allowedToDelete = false;
                 $showOwner = true;
                 $showGroup = true;
-                $vouchers = GroupAdmin::select(
-                        'vouchers.created_at',
-                        'vouchers.voucher_id',
-                        'vouchers.code',
-                        'users.email',
-                        'users.name',
-                        'groups.name as group_name',
-                        'group_members.is_active',
-                    )
-                    ->where('group_members.is_active', 1)
-                    ->where('group_admins.is_active', 1)
-                    ->where('user_admin_id', $userId)
-                    ->join(
-                        'groups',
-                        'groups.group_id',
-                        '=',
-                        'group_admins.group_id'
-                    )
-                    ->join(
-                        'group_members',
-                        'group_members.group_id',
-                        '=',
-                        'group_admins.group_id'
-                    )
-                    ->join(
-                        'vouchers',
-                        'vouchers.user_id',
-                        '=',
-                        'group_members.user_id'
-                    )
-                    ->join(
-                        'users',
-                        'users.id',
-                        '=',
-                        'vouchers.user_id'
-                    )
-                    ->paginate(5);
+                
+                $userVouchersByGroups = $this->modelService->getUserVoucherByGroups($userId);
+                $vouchers = $userVouchersByGroups['vouchers'];
+                $groups = $userVouchersByGroups['groups'];
+                
                 break;
             case 'super_admin':
-                $allowedToAdd = false;
-                $allowedToDelete = false;
                 $showOwner = true;
                 $showGroup = true;
-                $vouchers = Voucher::select(
-                        'vouchers.created_at',
-                        'vouchers.voucher_id',
-                        'vouchers.code',
-                        'groups.name as group_name',
-                        'group_members.is_active',
-                        'users.email',
-                        'users.name',
-                    )
-                    ->where('vouchers.deleted_at', null)
-                    ->join(
-                        'group_members',
-                        'group_members.user_id',
-                        '=',
-                        'vouchers.user_id'
-                    )
-                    ->join(
-                        'groups',
-                        'groups.group_id',
-                        '=',
-                        'group_members.group_id'
-                    )
-                    ->join(
-                        'users',
-                        'users.id',
-                        '=',
-                        'vouchers.user_id'
-                    )
-                    ->paginate(5);
+                
+                $userVouchersByGroups = $this->modelService->getAllUserVouchers();
+                $vouchers = $userVouchersByGroups['vouchers'];
+                
                 break;
             default:
-                $allowedToAdd = false;
-                $addIsOnLimit = false;
-                $allowedToDelete = false;
-                $showOwner = false;
-                $showGroup = false;
                 $vouchers = null;
         }
 
         return Inertia::render('Vouchers/Index', [
             'vouchers' => $vouchers,
             'allowedToAdd' => $allowedToAdd,
-            'addIsOnLimit' => $addIsOnLimit ?? false,
+            'addIsOnLimit' => $addIsOnLimit,
             'allowedToDelete' => $allowedToDelete,
             'showOwner' => $showOwner,
             'showGroup' => $showGroup,
-            'group' => $group ?? null
+            'group' => $userGroup ?? $groups ?? null,
         ]);
     }
 
@@ -165,7 +89,7 @@ class VoucherController extends Controller
      */
     public function create()
     {
-        //
+        return Inertia::render('Vouchers/Create');
     }
 
     /**
@@ -174,9 +98,19 @@ class VoucherController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(VoucherRequest $request)
     {
-        //
+        $store = $this->modelService->store($request);
+        if (!$store['success']) {
+            Log::error('Creating voucher failed', [
+                'Message' => $store['message']->getMessage(),
+                'Error' => $store
+            ]);
+
+            return redirect()->route('vouchers-create')->withErrors($store['message']->getMessage(), 'error');
+        }
+
+        return redirect()->route('vouchers-index');
     }
 
     /**
@@ -221,18 +155,49 @@ class VoucherController extends Controller
      */
     public function destroy($id)
     {
-        try {
-            $voucher = Voucher::find($id);
-            $voucher->delete();
-        } catch (Error $ex) {
+        $remove = $this->modelService->remove($id);
+        if (!$remove['success']) {
             Log::error('Deleting voucher failed', [
-                'Message' => $ex->getMessage(),
-                'Error' => $ex
+                'Message' => $remove['message']->getMessage(),
+                'Error' => $remove
             ]);
 
-            return redirect()->route('vouchers-index')->withErrors($ex->getMessage(), 'error');
+            return redirect()->route('vouchers-index')->withErrors($remove['message']->getMessage(), 'error');
         }
 
         return redirect()->route('vouchers-index');
+    }
+
+    public function export()
+    {
+        $userId = Auth::user()->id;
+        $userType = Auth::user()->user_type;
+
+        switch ($userType) {
+            case 'group_admin':
+                $fileName = $this->modelService->exportUserVoucherByGroups($userId);
+
+                break;
+            case 'super_admin':
+                $fileName = $this->modelService->exportAllUserVouchers();
+                
+                break;
+            default:
+                $fileName = null;
+        }
+        
+        $path = storage_path(str_replace("'", "", ("app\\")) . $fileName);
+
+        $results = [
+            'success' => ($fileName ?? null) ? true : false,
+            'path' => ($fileName ?? null) ? $path : false,
+            'user' => Auth::user()->email
+        ];
+
+        Log::info('Export Log.', [
+            'Data' => $results
+        ]);
+
+        return response()->download($path);
     }
 }
