@@ -1,6 +1,8 @@
 <script setup>
 import AppLayout from "@/Layouts/AppLayout.vue";
 import BackButton from "@/Components/BackButton.vue";
+import RefreshPage from "@/Components/RefreshButton.vue";
+import TimeStamp from "@/Components/TimeStamp.vue";
 
 import Button from "@/Components/PrimaryButton.vue";
 import Pagination from "@/Components/Pagination.vue";
@@ -114,7 +116,9 @@ function exportToExcel() {
     <AppLayout title="Vouchers">
         <template #header>
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                <BackButton /> &nbsp; VOUCHERS
+                <BackButton /> &nbsp; VOUCHERS &nbsp;
+
+                <span style="float: right;"><TimeStamp /> <RefreshPage /></span>
             </h2>
         </template>
 

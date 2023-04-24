@@ -32,10 +32,12 @@ Route::middleware([
     'verified',
 ])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    Route::get('/vouchers', [VoucherController::class, "index"])->name('vouchers-index')->middleware(['can:view-voucher']);
+    Route::delete('/vouchers/{id}', [VoucherController::class, "destroy"])->name('vouchers-destroy')->middleware(['can:delete-voucher']);
+    Route::get('/vouchers/create', [VoucherController::class, "create"])->name('vouchers-create')->middleware(['can:create-voucher']);
+    Route::post('/vouchers', [VoucherController::class, "store"])->name('vouchers-store')->middleware(['can:create-voucher']);
+    Route::get('/vouchers/export/{id}', [VoucherController::class, "export"])->name('vouchers-export')->middleware(['can:export']);
 });
 
-Route::get('/vouchers', [VoucherController::class, "index"])->name('vouchers-index')->middleware(['can:view-voucher']);
-Route::delete('/vouchers/{id}', [VoucherController::class, "destroy"])->name('vouchers-destroy')->middleware(['can:delete-voucher']);
-Route::get('/vouchers/create', [VoucherController::class, "create"])->name('vouchers-create')->middleware(['can:create-voucher']);
-Route::post('/vouchers', [VoucherController::class, "store"])->name('vouchers-store')->middleware(['can:create-voucher']);
-Route::get('/vouchers/export/{id}', [VoucherController::class, "export"])->name('vouchers-export')->middleware(['can:export']);
+

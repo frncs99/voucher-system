@@ -1,6 +1,8 @@
 <script setup>
 import AppLayout from "@/Layouts/AppLayout.vue";
 import BackButton from "@/Components/BackButton.vue";
+import RefreshPage from "@/Components/RefreshButton.vue";
+import TimeStamp from "@/Components/TimeStamp.vue";
 
 import FormSection from '@/Components/FormSection.vue';
 import InputLabel from '@/Components/InputLabel.vue';
@@ -63,7 +65,9 @@ const createVoucher = () => {
     <AppLayout title="Vouchers">
         <template #header>
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                <BackButton /> &nbsp; CREATE VOUCHER
+                <BackButton /> &nbsp; CREATE VOUCHER &nbsp;
+
+                <span style="float: right;"><TimeStamp /> <RefreshPage /></span>
             </h2>
         </template>
 

@@ -1,6 +1,8 @@
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue';
 import BackButton from "@/Components/BackButton.vue";
+import RefreshPage from "@/Components/RefreshButton.vue";
+import TimeStamp from "@/Components/TimeStamp.vue";
 import ApplicationLogo from '@/Components/ApplicationLogoVertical.vue';
 import NavLink from '@/Components/NavLink.vue';
 
@@ -26,10 +28,13 @@ const props = defineProps({
 <template>
     <AppLayout title="Dashboard">
         <template #header>
-            <h2 class=" text-gray-800 leading-tight">
+            <h2 class="text-gray-800 leading-tight">
                 <span class="font-semibold text-xl"><BackButton /> &nbsp; DASHBOARD</span>
                 
-                <span style="float: right;">Welcome to VoucherSystem Web Application!</span>
+                <span style="float: right;">
+                    Welcome to VoucherSystem Web Application!<br />
+                    <span style="float: right;"><TimeStamp /> <RefreshPage /></span>
+                </span>
             </h2>
             
         </template>
@@ -45,12 +50,12 @@ const props = defineProps({
                                         {{ voucherCount }}
                                     </h1>
                                     <h2 class="ml-3 text-xl font-semibold text-gray-900">
-                                        <a :href="route('vouchers-index')">
+                                        <p>
                                             <span v-if="!admin">You have</span>
                                             <span v-else>Number of</span>
                                             <br />
                                             VOUCHERS
-                                        </a>
+                                        </p>
                                     </h2>
                                 </div>
 
@@ -109,11 +114,11 @@ const props = defineProps({
                                         {{ userCount }}
                                     </h1>
                                     <h2 class="ml-3 text-xl font-semibold text-gray-900">
-                                        <a :href="route('vouchers-index')">
+                                        <p>
                                             Number of
                                             <br />
                                             USERS
-                                        </a>
+                                        </p>
                                     </h2>
                                 </div>
 
@@ -138,11 +143,11 @@ const props = defineProps({
                                         {{ adminCount }}
                                     </h1>
                                     <h2 class="ml-3 text-xl font-semibold text-gray-900">
-                                        <a :href="route('vouchers-index')">
+                                        <p>
                                             Number of
                                             <br />
                                             GROUP ADMIN
-                                        </a>
+                                        </p>
                                     </h2>
                                 </div>
 
