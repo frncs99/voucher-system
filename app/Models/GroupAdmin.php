@@ -13,14 +13,20 @@ class GroupAdmin extends Model
     protected $table = 'group_admins';
     protected $primaryKey = 'group_admin_id';
 
+    protected $fillable = [
+        'group_id',
+        'user_admin_id',
+        'is_active'
+    ];
+
     public function group()
     {
-        return $this->hasOne(Group::class, 'group_id');
+        return $this->hasOne(Group::class, 'group_id', 'group_id');
     }
 
     public function user()
     {
-        return $this->hasOne(User::class, 'user_admin_id');
+        return $this->hasOne(User::class, 'id', 'user_admin_id');
     }
 
     protected function serializeDate(DateTimeInterface $date)

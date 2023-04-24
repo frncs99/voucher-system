@@ -223,4 +223,44 @@ class BaseService
             'message' => null
         ];
     }
+
+    /**
+     * remove single record
+     */
+    public function deleteOrRestore(int $id)
+    {
+        try {
+            $record = $this->model->withTrashed()->find($id);
+            if ($record->trashed()) {
+                $record->restore();
+            } else {
+                $record->delete();
+            }
+        } catch (Error $er) {
+            return [
+                'success' => false,
+                'message' => $er
+            ];
+        } catch (ErrorException $ex) {
+            return [
+                'success' => false,
+                'message' => $ex
+            ];
+        } catch (QueryException $qex) {
+            return [
+                'success' => false,
+                'message' => $qex
+            ];
+        } catch (PDOException $pex) {
+            return [
+                'success' => false,
+                'message' => $pex
+            ];
+        }
+
+        return [
+            'success' => true,
+            'message' => null
+        ];
+    }
 }

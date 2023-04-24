@@ -26,9 +26,7 @@ class VoucherSeeder extends Seeder
             if (!isset($voucher->user_id)) {
                 $voucher->user_id = $userId;
 
-                $count = Voucher::where('user_id', $userId)
-                    ->where('deleted_at', null)
-                    ->count();
+                $count = Voucher::where('user_id', $userId)->count();
 
                 if ($count < 10) {
                     $voucher->save();

@@ -18,7 +18,7 @@ class GroupMemberSeeder extends Seeder
     public function run()
     {
         $users = User::where('user_type', 'user')->pluck('id');
-        $groups = Group::where('deleted_at', null)->pluck('group_id')->toArray();
+        $groups = Group::pluck('group_id')->toArray();
 
         foreach($users as $user) {
             $groupMember = GroupMember::firstOrNew(['user_id' => $user]);

@@ -11,31 +11,9 @@ import { router } from '@inertiajs/vue3';
 import Swal from 'sweetalert2';
 
 const props = defineProps({
-    vouchers: {
+    groups: {
         type: Object,
         default: () => ({}),
-    },
-    allowedToAdd: {
-        type: Boolean
-    },
-    addIsOnLimit: {
-        type: Boolean
-    },
-    allowedToDelete: {
-        type: Boolean
-    },
-    showOwner: {
-        type: Boolean
-    },
-    showGroup: {
-        type: Boolean
-    },
-    group: {
-        type: Object,
-        default: () => ({}),
-    },
-    userId: {
-        type: Int32Array
     },
 });
 
@@ -51,72 +29,44 @@ const Toast = Swal.mixin({
     }
 });
 
-function destroy(id) {
-    if (confirm("Are you sure you want to delete?")) {
-        router.delete(route('vouchers-destroy', id), {
+function addGroup() {
+    router.get(route('groups-create'));
+}
+
+function assignAdmin(id) {
+    router.get(route('groups-admin', id));
+}
+
+function edit(id) {
+    router.get(route('groups-edit', id));
+}
+
+function destroy(isDelete, id) {
+    if (confirm("Are you sure you want to " + (isDelete ? "delete?" : "restore?"))) {
+        router.delete(route('groups-destroy', id), {
             onSuccess: (response) => {
                 Toast.fire({
                     icon: 'success',
-                    title: 'Voucher deleted successfully.'
+                    title: 'Group ' + (isDelete ? "deleted" : "restored") + ' successfully.',
                 });
             },
             onError: (response) => {
                 Toast.fire({
                     icon: 'error',
-                    title: 'Failed deleting Voucher.',
+                    title: 'Failed deleting Group.',
                     text: JSON.stringify(response.error),
                 });
             }
         });
     }
 }
-
-function checkLimit() {
-    if (props.addIsOnLimit) {
-        Toast.fire({
-            icon: 'error',
-            title: 'Failed adding Voucher.',
-            text: 'Reached 10 vouchers limit per user.',
-        });
-
-        return;
-    }
-
-    router.get(route('vouchers-create'));
-}
-
-function exportToExcel() {
-    let filename = '';
-    fetch(route('vouchers-export', { id: props.userId }))
-        .then((res) => {
-            let header = res.headers.get('Content-Disposition');
-            let parts = header.split(';');
-            filename = parts[1].split('=')[1];
-            return res.blob();
-        })
-        .then((blob) => {
-            const file = window.URL.createObjectURL(blob);
-            var a = document.createElement("a");
-            document.body.appendChild(a);
-            a.style = "display: none";
-            a.href = file;
-            a.download = filename;
-            a.click();
-            window.URL.revokeObjectURL(blob);
-        });
-
-    Toast.fire({
-        icon: 'success',
-        title: 'Vouchers exported successfully.'
-    });
-}
 </script>
 
 <template>
-    <AppLayout title="Vouchers">
+    <AppLayout title="Groups">
         <template #header>
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                <BackButton /> &nbsp; VOUCHERS &nbsp;
+                <BackButton /> &nbsp; GROUPS &nbsp;
 
                 <span style="float: right;"><TimeStamp /> <RefreshPage /></span>
             </h2>
@@ -127,55 +77,70 @@ function exportToExcel() {
                 <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg">
                     <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                         <div class="p-6 bg-white border-b border-gray-200">
-                            <div v-if="allowedToAdd" class="mb-2">
-                                <span v-if="group" style="float: right;">GROUP: {{ group.name }}</span>
-                                <Button class="mr-2" @click="checkLimit()">Add Voucher</Button>
-                            </div>
-                            <div v-else class="mb-2">
-                                <Button class="mr-2" @click="exportToExcel()">Export</Button>
+                            <div class="mb-2">
+                                <Button @click="addGroup()" class="mr-2">
+                                    Add Group
+                                </Button>
                             </div>
                             <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
                                 <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
                                     <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                                         <tr>
-                                            <th v-if="showGroup" scope="col" class="px-6 py-3">
-                                                Group Name
+                                            <th scope="col" class="px-6 py-3">
+                                                Id
                                             </th>
                                             <th scope="col" class="px-6 py-3">
-                                                Code
-                                            </th>
-                                            <th v-if="showOwner" scope="col" class="px-6 py-3">
-                                                Owner
+                                                Name
                                             </th>
                                             <th scope="col" class="px-6 py-3">
                                                 Added Date
                                             </th>
-                                            <th v-if="allowedToDelete" scope="col" class="px-6 py-3">
+                                            <th scope="col" class="px-6 py-3">
                                                 Action
                                             </th>
                                         </tr>
                                     </thead>
-                                    <tbody v-if="vouchers && vouchers.data.length > 0">
+                                    <tbody v-if="groups && groups.data.length > 0">
                                         <tr
-                                            v-for="voucher in vouchers.data"
-                                            :key="voucher.voucher_id"
+                                            v-for="group in groups.data"
+                                            :key="group.group_id"
                                             class="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
                                         >
-                                            <th v-if="showGroup" class="px-6 py-4 font-medium text-gray-900 dark:text-white whitespace-nowrap">
-                                                <span v-if="voucher.is_active == 1">{{ voucher.group_name }}</span>
-                                                <span v-else>NO GROUP</span>
-                                            </th>
                                             <td class="px-6 py-4 font-medium text-gray-900 dark:text-white whitespace-nowrap">
-                                                {{ voucher.code }}
-                                            </td>
-                                            <td v-if="showOwner" class="px-6 py-4 font-medium text-gray-900 dark:text-white whitespace-nowrap">
-                                                {{ voucher.name }} ({{ voucher.email }})
+                                                {{ group.group_id }}
                                             </td>
                                             <td class="px-6 py-4 font-medium text-gray-900 dark:text-white whitespace-nowrap">
-                                                {{ voucher.created_at }}
+                                                {{ group.name }}
                                             </td>
-                                            <td v-if="allowedToDelete" class="px-6 py-4">
-                                                <Button class="bg-red-600" @click="destroy(voucher.voucher_id)">
+                                            <td class="px-6 py-4 font-medium text-gray-900 dark:text-white whitespace-nowrap">
+                                                {{ group.created_at }}
+                                            </td>
+                                            <td class="px-4 py-4">
+                                                <Button v-if="!group.deleted_at" class="text-white bg-black" @click="assignAdmin(group.group_id)">
+                                                    Admin
+                                                </Button>
+                                                <Button disabled v-else class="cursor-not-allowed text-black hover:text-white line-through text-white bg-black">
+                                                    Admin
+                                                </Button>
+                                                &nbsp;
+                                                <Button v-if="!group.deleted_at" class="text-white bg-white bg-opacity-25" @click="assign(group.group_id)">
+                                                    Members
+                                                </Button>
+                                                <Button disabled v-else class="cursor-not-allowed line-through text-white bg-white bg-opacity-25">
+                                                    Members
+                                                </Button>
+                                                &nbsp;
+                                                <Button v-if="!group.deleted_at" class="bg-indigo-500" @click="edit(group.group_id)">
+                                                    Edit
+                                                </Button>
+                                                <Button disabled v-else class="cursor-not-allowed line-through bg-indigo-500">
+                                                    Edit
+                                                </Button>
+                                                &nbsp;
+                                                <Button v-if="group.deleted_at" class="bg-red-600" @click="destroy(false, group.group_id)">
+                                                    Restore
+                                                </Button>
+                                                <Button v-else class="bg-red-600 bg-opacity-75" @click="destroy(true, group.group_id)">
                                                     Delete
                                                 </Button>
                                             </td>
@@ -190,7 +155,7 @@ function exportToExcel() {
                                     </tbody>
                                 </table>
                             </div>
-                            <Pagination :links="vouchers.links" />
+                            <Pagination :links="groups.links" />
                         </div>
                     </div>
                 </div>

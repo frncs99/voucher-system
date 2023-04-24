@@ -18,7 +18,7 @@ class GroupAdminSeeder extends Seeder
     public function run()
     {
         $users = User::where('user_type', 'group_admin')->pluck('id');
-        $groups = Group::where('deleted_at', null)->pluck('group_id')->toArray();
+        $groups = Group::pluck('group_id')->toArray();
 
         foreach($users as $user) {
             GroupAdmin::updateOrCreate(

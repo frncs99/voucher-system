@@ -26,17 +26,18 @@ class VoucherService extends BaseService
         $this->tableName = ["vouchers"] ;
 
         // validator class for the controller
-        $this->requestValidator = new VoucherRequest();
+        // $this->requestValidator = new VoucherRequest();
 
         // model resource for response formatting
-        $this->modelResource = "App\Http\Resources\VoucherResource";
+        // $this->modelResource = "App\Http\Resources\VoucherResource";
     }
 
     public function paginateQueryWithoutModelResource($query, $count)
     {
+        $originalModelResource = $this->modelResource;
         $this->modelResource = null;
         $query = $this->allWithPagination($query, $count);
-        $this->modelResource = "App\Http\Resources\VoucherResource";
+        $this->modelResource = $originalModelResource;
 
         return $query;
     }
@@ -73,8 +74,7 @@ class VoucherService extends BaseService
 
     public function getAllGroup()
     {
-        return Group::where('deleted_at', null)
-            ->pluck('name')
+        return Group::pluck('name')
             ->toArray();
     }
 
@@ -85,8 +85,7 @@ class VoucherService extends BaseService
                 'vouchers.voucher_id',
                 'vouchers.code',
             )
-            ->where('vouchers.user_id', $userId)
-            ->where('vouchers.deleted_at', null);
+            ->where('vouchers.user_id', $userId);
         
         if ($vouchers->count() >= 10) {
             $addIsOnLimit = true;
@@ -160,7 +159,6 @@ class VoucherService extends BaseService
                 'users.email',
                 'users.name',
             )
-            ->where('vouchers.deleted_at', null)
             ->join(
                 'group_members',
                 'group_members.user_id',
@@ -188,7 +186,6 @@ class VoucherService extends BaseService
     public function getUserVoucherCounts(int $userId)
     {
         return $this->model::where('vouchers.user_id', $userId)
-            ->where('vouchers.deleted_at', null)
             ->count();
     }
 
@@ -235,7 +232,6 @@ class VoucherService extends BaseService
                 'users.email',
                 'users.name',
             )
-            ->where('vouchers.deleted_at', null)
             ->join(
                 'group_members',
                 'group_members.user_id',
@@ -336,7 +332,6 @@ class VoucherService extends BaseService
                 'users.email',
                 'users.name',
             )
-            ->where('vouchers.deleted_at', null)
             ->join(
                 'group_members',
                 'group_members.user_id',

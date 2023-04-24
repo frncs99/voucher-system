@@ -57,6 +57,11 @@ const logout = () => {
                                     Vouchers
                                 </NavLink>
                             </div>
+                            <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
+                                <NavLink :href="route('groups-index')" :active="route().current('groups-admin') || route().current('groups-new-admin') || route().current('groups-index') || route().current('groups-create') || route().current('groups-edit') || route().current('groups-assign')">
+                                    Groups
+                                </NavLink>
+                            </div>
                         </div>
 
                         <div class="hidden sm:flex sm:items-center sm:ml-6">
@@ -201,6 +206,9 @@ const logout = () => {
                         </ResponsiveNavLink>
                         <ResponsiveNavLink :href="route('vouchers-index')" :active="route().current('vouchers-index') || route().current('vouchers-create')">
                             Vouchers
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink :href="route('groups-index')" :active="route().current('groups-admin') || route().current('groups-new-admin') || route().current('groups-index') || route().current('groups-create') || route().current('groups-edit') || route().current('groups-assign')">
+                            Groups
                         </ResponsiveNavLink>
                     </div>
 

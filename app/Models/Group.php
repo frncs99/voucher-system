@@ -16,6 +16,10 @@ class Group extends Model
     protected $table = 'groups';
     protected $primaryKey = 'group_id';
 
+    protected $fillable = [
+        'name',
+    ];
+
     protected function serializeDate(DateTimeInterface $date)
     {
         return $date->format('Y-m-d H:i:s');

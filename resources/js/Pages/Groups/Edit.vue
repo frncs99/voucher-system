@@ -28,32 +28,36 @@ const Toast = Swal.mixin({
     }
 });
 
-const codeInput = ref(null);
+const nameInput = ref(null);
 const form = useForm({
-    user_id: props.userId,
-    code: '',
+    group_id: props.group.group_id,
+    name: props.group.name,
 });
 
 const props = defineProps({
-    userId: {
+    groupId: {
         type: Int32Array
+    },
+    group: {
+        type: Object,
+        default: () => ({}),
     },
 });
 
-const createVoucher = () => {
-    form.post(route('vouchers-store'), {
+const editGroup = () => {
+    form.patch(route('groups-update', form.group_id), {
         preserveScroll: true,
         onSuccess: (response) => {
             form.reset();
             Toast.fire({
                 icon: 'success',
-                title: 'Voucher created successfully.'
+                title: 'Group updated successfully.'
             });
         },
         onError: (error) => {
-            if (form.errors.code) {
-                form.reset('code');
-                codeInput.value.focus();
+            if (form.errors.name) {
+                form.reset('name');
+                nameInput.value.focus();
             }
         },
     });
@@ -61,10 +65,10 @@ const createVoucher = () => {
 </script>
 
 <template>
-    <AppLayout title="Vouchers">
+    <AppLayout title="Groups">
         <template #header>
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                <BackButton /> &nbsp; CREATE VOUCHER &nbsp;
+                <BackButton /> &nbsp; EDIT GROUP &nbsp;
 
                 <span style="float: right;"><TimeStamp /> <RefreshPage /></span>
             </h2>
@@ -75,27 +79,27 @@ const createVoucher = () => {
                 <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg">
                     <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                         <div class="p-6 bg-white border-b border-gray-200">
-                            <FormSection @submitted="createVoucher">
+                            <FormSection @submitted="editGroup">
                                 <template #title>
-                                    Create a New Voucher
+                                    Edit Group #{{ group.group_id }}
                                 </template>
 
                                 <template #description>
-                                    Code must be unique. Maximum of 10 Vouchers per User are allowed.
+                                    Edit the name of the group.
                                 </template>
 
                                 <template #form>
                                     <div class="col-span-6 sm:col-span-4">
-                                        <InputLabel for="code" value="CODE" />
+                                        <InputLabel for="name" value="NAME" />
                                         <TextInput
-                                            id="code"
-                                            ref="codeInput"
-                                            v-model="form.code"
+                                            id="name"
+                                            ref="nameInput"
+                                            v-model="form.name"
                                             type="text"
                                             class="mt-1 block w-full"
-                                            autocomplete="code"
+                                            autocomplete="name"
                                         />
-                                        <InputError :message="form.errors.code" class="mt-2" />
+                                        <InputError :message="form.errors.name" class="mt-2" />
                                     </div>
                                 </template>
 

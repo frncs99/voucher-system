@@ -28,32 +28,36 @@ const Toast = Swal.mixin({
     }
 });
 
-const codeInput = ref(null);
-const form = useForm({
-    user_id: props.userId,
-    code: '',
-});
-
 const props = defineProps({
-    userId: {
-        type: Int32Array
+    group: {
+        type: Object,
+        default: () => ({}),
+    },
+    admins: {
+        type: Object,
+        default: () => ({}),
     },
 });
 
-const createVoucher = () => {
-    form.post(route('vouchers-store'), {
+const userAdminIdInput = ref(null);
+const form = useForm({
+    user_admin_id: '',
+});
+
+const createAdmin = () => {
+    form.post(route('groups-admin-add', props.group.group_id), {
         preserveScroll: true,
         onSuccess: (response) => {
             form.reset();
             Toast.fire({
                 icon: 'success',
-                title: 'Voucher created successfully.'
+                title: 'Group created successfully.'
             });
         },
         onError: (error) => {
-            if (form.errors.code) {
-                form.reset('code');
-                codeInput.value.focus();
+            if (form.errors.user_admin_id) {
+                form.reset('user_admin_id');
+                userAdminIdInput.value.focus();
             }
         },
     });
@@ -61,10 +65,10 @@ const createVoucher = () => {
 </script>
 
 <template>
-    <AppLayout title="Vouchers">
+    <AppLayout title="Groups">
         <template #header>
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                <BackButton /> &nbsp; CREATE VOUCHER &nbsp;
+                <BackButton /> &nbsp; CREATE NEW ADMIN &nbsp;
 
                 <span style="float: right;"><TimeStamp /> <RefreshPage /></span>
             </h2>
@@ -75,27 +79,25 @@ const createVoucher = () => {
                 <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg">
                     <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                         <div class="p-6 bg-white border-b border-gray-200">
-                            <FormSection @submitted="createVoucher">
+                            <FormSection @submitted="createAdmin">
                                 <template #title>
-                                    Create a New Voucher
+                                    Create a New Admin
                                 </template>
 
                                 <template #description>
-                                    Code must be unique. Maximum of 10 Vouchers per User are allowed.
+                                    Select Admin to be assigned to the Group named: <b>{{ group.name }}</b>.
                                 </template>
 
                                 <template #form>
                                     <div class="col-span-6 sm:col-span-4">
-                                        <InputLabel for="code" value="CODE" />
-                                        <TextInput
-                                            id="code"
-                                            ref="codeInput"
-                                            v-model="form.code"
-                                            type="text"
-                                            class="mt-1 block w-full"
-                                            autocomplete="code"
-                                        />
-                                        <InputError :message="form.errors.code" class="mt-2" />
+                                        <InputLabel for="user_admin_id" value="NAME" />
+                                        <select v-model="form.user_admin_id" class="mt-2 block appearance-none w-full bg-white border text-slate text-sm py-3 px-4 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray">
+                                            <option v-for="item in admins" :value="item.id" :key="item.id" class="text-slate text-sm">
+                                                {{ item.name }} ({{ item.email }})
+                                            </option>
+                                        </select>
+
+                                        <InputError :message="form.errors.user_admin_id" class="mt-2" />
                                     </div>
                                 </template>
 
