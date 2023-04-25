@@ -36,12 +36,12 @@ function addAdmin() {
 function assign(isDelete, id) {
     if (confirm("Are you sure you want to " + (isDelete ? "remove?" : "restore?"))) {
         router.patch(route('groups-assign-admin', id));
-    }
 
-    Toast.fire({
-        icon: 'success',
-        title: 'Group Admin ' + (isDelete ? "removed" : "restored") + ' successfully.',
-    });
+        Toast.fire({
+            icon: 'success',
+            title: 'Group Admin ' + (isDelete ? "removed" : "restored") + ' successfully.',
+        });
+    }
 }
 </script>
 
@@ -61,6 +61,7 @@ function assign(isDelete, id) {
                     <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                         <div class="p-6 bg-white border-b border-gray-200">
                             <div class="mb-2">
+                                <span style="float: right;">GROUP: {{ groupAdmins.data[0].group_name }}</span>
                                 <Button @click="addAdmin()" class="mr-2">
                                     Add New Admin
                                 </Button>

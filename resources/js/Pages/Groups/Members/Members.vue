@@ -5,13 +5,12 @@ import RefreshPage from "@/Components/RefreshButton.vue";
 import TimeStamp from "@/Components/TimeStamp.vue";
 
 import Button from "@/Components/PrimaryButton.vue";
-import Pagination from "@/Components/Pagination.vue";
 import { router } from '@inertiajs/vue3';
 
 import Swal from 'sweetalert2';
 
 const props = defineProps({
-    groups: {
+    groupMembers: {
         type: Object,
         default: () => ({}),
     },
@@ -29,38 +28,18 @@ const Toast = Swal.mixin({
     }
 });
 
-function addGroup() {
-    router.get(route('groups-create'));
+function addMembers() {
+    let id = window.location.href.split("/").pop();
+    router.get(route('group-new-member', id));
 }
 
-function assignAdmin(id) {
-    router.get(route('groups-admin', id));
-}
+function assign(isDelete, id) {
+    if (confirm("Are you sure you want to " + (isDelete ? "remove?" : "restore?"))) {
+        router.patch(route('group-assign-member', id));
 
-function assignMembers(id) {
-    router.get(route('group-member', id));
-}
-
-function edit(id) {
-    router.get(route('groups-edit', id));
-}
-
-function destroy(isDelete, id) {
-    if (confirm("Are you sure you want to " + (isDelete ? "delete?" : "restore?"))) {
-        router.delete(route('groups-destroy', id), {
-            onSuccess: (response) => {
-                Toast.fire({
-                    icon: 'success',
-                    title: 'Group ' + (isDelete ? "deleted" : "restored") + ' successfully.',
-                });
-            },
-            onError: (response) => {
-                Toast.fire({
-                    icon: 'error',
-                    title: 'Failed deleting Group.',
-                    text: JSON.stringify(response.error),
-                });
-            }
+        Toast.fire({
+            icon: 'success',
+            title: 'Group Member ' + (isDelete ? "removed" : "restored") + ' successfully.',
         });
     }
 }
@@ -70,7 +49,7 @@ function destroy(isDelete, id) {
     <AppLayout title="Groups">
         <template #header>
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                <BackButton /> &nbsp; GROUPS &nbsp;
+                <BackButton /> &nbsp; GROUP MEMBERS &nbsp;
 
                 <span style="float: right;"><TimeStamp /> <RefreshPage /></span>
             </h2>
@@ -82,8 +61,9 @@ function destroy(isDelete, id) {
                     <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                         <div class="p-6 bg-white border-b border-gray-200">
                             <div class="mb-2">
-                                <Button @click="addGroup()" class="mr-2">
-                                    Add Group
+                                <span v-if="groupMembers.data[0]" style="float: right;">GROUP: {{ groupMembers.data[0].group_name ?? 'N/A' }}</span>
+                                <Button @click="addMembers()" class="mr-2">
+                                    Add Members
                                 </Button>
                             </div>
                             <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
@@ -91,10 +71,10 @@ function destroy(isDelete, id) {
                                     <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                                         <tr>
                                             <th scope="col" class="px-6 py-3">
-                                                Id
+                                                Member Id
                                             </th>
                                             <th scope="col" class="px-6 py-3">
-                                                Name
+                                                User
                                             </th>
                                             <th scope="col" class="px-6 py-3">
                                                 Added Date
@@ -104,48 +84,27 @@ function destroy(isDelete, id) {
                                             </th>
                                         </tr>
                                     </thead>
-                                    <tbody v-if="groups && groups.data.length > 0">
+                                    <tbody v-if="groupMembers && groupMembers.data.length > 0">
                                         <tr
-                                            v-for="group in groups.data"
-                                            :key="group.group_id"
+                                            v-for="groupMember in groupMembers.data"
+                                            :key="groupMember.group_member_id"
                                             class="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
                                         >
                                             <td class="px-6 py-4 font-medium text-gray-900 dark:text-white whitespace-nowrap">
-                                                {{ group.group_id }}
+                                                {{ groupMember.group_member_id }}
                                             </td>
                                             <td class="px-6 py-4 font-medium text-gray-900 dark:text-white whitespace-nowrap">
-                                                {{ group.name }}
+                                                {{ groupMember.name }} ({{ groupMember.email }})
                                             </td>
                                             <td class="px-6 py-4 font-medium text-gray-900 dark:text-white whitespace-nowrap">
-                                                {{ group.created_at }}
+                                                {{ groupMember.created_at }}
                                             </td>
                                             <td class="px-4 py-4">
-                                                <Button v-if="!group.deleted_at" class="text-white bg-white bg-opacity-5 hover:bg-white hover:bg-opacity-25" @click="assignAdmin(group.group_id)">
-                                                    Admin
-                                                </Button>
-                                                <Button disabled v-else class="cursor-not-allowed hover:text-white line-through text-white bg-white bg-opacity-5 hover:bg-white hover:bg-opacity-25">
-                                                    Admin
-                                                </Button>
-                                                &nbsp;
-                                                <Button v-if="!group.deleted_at" class="text-white bg-white bg-opacity-25" @click="assignMembers(group.group_id)">
-                                                    Members
-                                                </Button>
-                                                <Button disabled v-else class="cursor-not-allowed line-through text-white bg-white bg-opacity-25">
-                                                    Members
-                                                </Button>
-                                                &nbsp;
-                                                <Button v-if="!group.deleted_at" class="bg-indigo-500" @click="edit(group.group_id)">
-                                                    Edit
-                                                </Button>
-                                                <Button disabled v-else class="cursor-not-allowed line-through bg-indigo-500">
-                                                    Edit
-                                                </Button>
-                                                &nbsp;
-                                                <Button v-if="group.deleted_at" class="bg-red-600" @click="destroy(false, group.group_id)">
+                                                <Button v-if="groupMember.is_active == 0" class="bg-indigo-600 bg-opacity-75" @click="assign(false, groupMember.group_member_id)">
                                                     Restore
                                                 </Button>
-                                                <Button v-else class="bg-red-600 bg-opacity-75" @click="destroy(true, group.group_id)">
-                                                    Delete
+                                                <Button v-else class="bg-red-600 bg-opacity-75" @click="assign(true, groupMember.group_member_id)">
+                                                    Remove
                                                 </Button>
                                             </td>
                                         </tr>
@@ -159,7 +118,6 @@ function destroy(isDelete, id) {
                                     </tbody>
                                 </table>
                             </div>
-                            <Pagination :links="groups.links" />
                         </div>
                     </div>
                 </div>

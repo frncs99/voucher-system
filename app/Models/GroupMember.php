@@ -13,14 +13,20 @@ class GroupMember extends Model
     protected $table = 'group_members';
     protected $primaryKey = 'group_member_id';
 
+    protected $fillable = [
+        'group_id',
+        'user_id',
+        'is_active'
+    ];
+
     public function group()
     {
-        return $this->hasOne(Group::class, 'group_id');
+        return $this->hasOne(Group::class, 'group_id', 'group_id');
     }
 
     public function user()
     {
-        return $this->hasOne(User::class, 'user_id');
+        return $this->belongsTo(User::class);
     }
 
     protected function serializeDate(DateTimeInterface $date)

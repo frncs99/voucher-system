@@ -5,18 +5,23 @@ namespace App\Http\Controllers;
 use App\Http\Requests\GroupStoreRequest;
 use App\Http\Requests\GroupUpdateRequest;
 use App\Http\Requests\NewAdminRequest;
+use App\Http\Requests\NewMemberRequest;
 use App\Http\Resources\GroupAdminResource;
+use App\Http\Resources\GroupMemberResource;
 use App\Interfaces\GroupAssigningAdminInterface;
+use App\Interfaces\GroupAssigningMemberInterface;
 use App\Models\Group;
 use App\Models\GroupAdmin;
+use App\Models\GroupMember;
 use App\Models\User;
 use App\Services\GroupService;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
-class GroupController extends Controller implements GroupAssigningAdminInterface
+class GroupController extends Controller implements GroupAssigningAdminInterface, GroupAssigningMemberInterface
 {
     protected $modelService;
 
@@ -32,11 +37,23 @@ class GroupController extends Controller implements GroupAssigningAdminInterface
      */
     public function index()
     {
-        $groups = $this->modelService->allWithPagination(Group::withTrashed());
+        if (Auth::user()->user_type == 'super_admin') {
+            $groups = $this->modelService->allWithPagination(Group::withTrashed());
 
-        return Inertia::render('Groups/Index', [
-            'groups' => $groups,
-        ]);
+            return Inertia::render('Groups/Index', [
+                'groups' => $groups,
+            ]);
+        } else {
+            $groupIds = GroupAdmin::where('user_admin_id', Auth::user()->id)
+                ->where('is_active', 1)
+                ->pluck('group_id')
+                ->toArray();
+            $groups = $this->modelService->allWithPagination(Group::whereIn('group_id', $groupIds));
+
+            return Inertia::render('Groups/Members/Index', [
+                'groups' => $groups,
+            ]);
+        }
     }
 
     /**
@@ -188,5 +205,67 @@ class GroupController extends Controller implements GroupAssigningAdminInterface
         }
 
         return redirect()->route('groups-admin', $id);
+    }
+
+    public function getMembers(int $groupId)
+    {
+        $members = GroupMember::where('group_id', $groupId)
+            // ->where('is_active', 1)
+            ->get();
+            
+        return Inertia::render('Groups/Members/Members', [
+            'groupMembers' => GroupMemberResource::collection($members),
+        ]);
+    }
+
+    public function assignMember(int $groupMemberId)
+    {
+        try {            
+            $member = GroupMember::find($groupMemberId);
+            $member->is_active = ($member->is_active == 1) ? 0 : 1;
+            $member->save();
+        } catch (Exception $ex) {
+            return redirect()->route('group-index')->withErrors($ex->getMessage(), 'error');
+        }
+
+        return redirect()->route('group-member', $member->group_id);
+    }
+
+    public function createNewMember(int $groupId)
+    {
+        $group = $this->modelService->find($groupId);
+        $users = User::select('id', 'email', 'name')->where('user_type', 'user')->get();
+        
+        return Inertia::render('Groups/Members/NewMembers', [
+            'group' => $group, 
+            'users' => $users,
+        ]);
+    }
+
+    public function checkCurrentGroup(int $userId)
+    {
+        return GroupMember::where('user_id', $userId)
+            ->where('is_active', 1)
+            ->join(
+                'groups',
+                'groups.group_id',
+                '=',
+                'group_members.group_id'
+            )
+            ->pluck('name');
+    }
+
+    public function storeNewMember(NewMemberRequest $request, $id)
+    {
+        try {
+            $groupMember = GroupMember::firstOrNew(['user_id' => $request->user_id]);
+            $groupMember->group_id = $id;
+            $groupMember->is_active = 1;
+            $groupMember->save();
+        } catch (Exception $ex) {
+            return redirect()->route('group-new-member', $id)->withErrors($ex->getMessage(), 'error');
+        }
+
+        return redirect()->route('group-member', $id);
     }
 }

@@ -59,7 +59,7 @@ class DashboardController extends Controller implements VoucherCountersInterface
     {
         switch ($userType) {
             case 'user':
-                $groups = [$this->modelService->getUserGroup($userId)->name];
+                $groups = [$this->modelService->getUserGroup($userId)->name ?? null];
                 
                 break;
             case 'group_admin':

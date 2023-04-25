@@ -29,40 +29,8 @@ const Toast = Swal.mixin({
     }
 });
 
-function addGroup() {
-    router.get(route('groups-create'));
-}
-
-function assignAdmin(id) {
-    router.get(route('groups-admin', id));
-}
-
 function assignMembers(id) {
     router.get(route('group-member', id));
-}
-
-function edit(id) {
-    router.get(route('groups-edit', id));
-}
-
-function destroy(isDelete, id) {
-    if (confirm("Are you sure you want to " + (isDelete ? "delete?" : "restore?"))) {
-        router.delete(route('groups-destroy', id), {
-            onSuccess: (response) => {
-                Toast.fire({
-                    icon: 'success',
-                    title: 'Group ' + (isDelete ? "deleted" : "restored") + ' successfully.',
-                });
-            },
-            onError: (response) => {
-                Toast.fire({
-                    icon: 'error',
-                    title: 'Failed deleting Group.',
-                    text: JSON.stringify(response.error),
-                });
-            }
-        });
-    }
 }
 </script>
 
@@ -81,11 +49,6 @@ function destroy(isDelete, id) {
                 <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg">
                     <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                         <div class="p-6 bg-white border-b border-gray-200">
-                            <div class="mb-2">
-                                <Button @click="addGroup()" class="mr-2">
-                                    Add Group
-                                </Button>
-                            </div>
                             <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
                                 <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
                                     <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
@@ -120,32 +83,8 @@ function destroy(isDelete, id) {
                                                 {{ group.created_at }}
                                             </td>
                                             <td class="px-4 py-4">
-                                                <Button v-if="!group.deleted_at" class="text-white bg-white bg-opacity-5 hover:bg-white hover:bg-opacity-25" @click="assignAdmin(group.group_id)">
-                                                    Admin
-                                                </Button>
-                                                <Button disabled v-else class="cursor-not-allowed hover:text-white line-through text-white bg-white bg-opacity-5 hover:bg-white hover:bg-opacity-25">
-                                                    Admin
-                                                </Button>
-                                                &nbsp;
-                                                <Button v-if="!group.deleted_at" class="text-white bg-white bg-opacity-25" @click="assignMembers(group.group_id)">
-                                                    Members
-                                                </Button>
-                                                <Button disabled v-else class="cursor-not-allowed line-through text-white bg-white bg-opacity-25">
-                                                    Members
-                                                </Button>
-                                                &nbsp;
-                                                <Button v-if="!group.deleted_at" class="bg-indigo-500" @click="edit(group.group_id)">
-                                                    Edit
-                                                </Button>
-                                                <Button disabled v-else class="cursor-not-allowed line-through bg-indigo-500">
-                                                    Edit
-                                                </Button>
-                                                &nbsp;
-                                                <Button v-if="group.deleted_at" class="bg-red-600" @click="destroy(false, group.group_id)">
-                                                    Restore
-                                                </Button>
-                                                <Button v-else class="bg-red-600 bg-opacity-75" @click="destroy(true, group.group_id)">
-                                                    Delete
+                                                <Button class="text-white bg-white bg-opacity-25" @click="assignMembers(group.group_id)">
+                                                    Assign Members
                                                 </Button>
                                             </td>
                                         </tr>

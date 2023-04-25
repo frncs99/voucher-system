@@ -78,7 +78,12 @@ const props = defineProps({
                                 <div class="flex items-center">
                                     <ApplicationLogo v-if="!admin" class="block h-12 w-auto" />
                                         <span class="text-3xl" v-if="!admin">
-                                            {{ ownGroups[0] }}
+                                            <span v-if="ownGroups[0] != null">
+                                                {{ ownGroups[0] }}
+                                            </span>
+                                            <span v-else>
+                                                Oooops! No Group yet.
+                                            </span>
                                         </span>
                                         <h1 v-if="admin" class="mb-1 text-8xl font-semibold text-gray-900">
                                             {{ ownGroups.length }}
@@ -90,7 +95,13 @@ const props = defineProps({
 
                                 <p class="mt-4 text-gray-500 text-sm leading-relaxed">
                                     <span v-if="!admin">
-                                        You belong to Group named {{ ownGroups[0] }}. <br />Contact support if assistance is needed.
+                                        <span v-if="ownGroups[0] != null">
+                                            You belong to Group named {{ ownGroups[0] }}.
+                                        </span>
+                                        <span v-else>
+                                            You don't belong to any group as of now. Wait for an admin to add you to a group.
+                                        </span>
+                                        <br />Contact support if assistance is needed.
                                     </span>
                                     <span v-else>
                                         View and edit groups here. As Admin, you have privilege to this feature.
@@ -98,7 +109,14 @@ const props = defineProps({
                                 </p>
 
                                 <p v-if="admin" class="mt-4 text-sm">
-                                    <NavLink :href="route('groups-index')" class="inline-flex items-center font-semibold text-indigo-700">
+                                    <NavLink v-if="$page.props.auth.user.user_type == 'super_admin'" :href="route('groups-index')" class="inline-flex items-center font-semibold text-indigo-700">
+                                        Explore the Groups Menu
+
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="ml-1 w-5 h-5 fill-indigo-500">
+                                            <path fill-rule="evenodd" d="M5 10a.75.75 0 01.75-.75h6.638L10.23 7.29a.75.75 0 111.04-1.08l3.5 3.25a.75.75 0 010 1.08l-3.5 3.25a.75.75 0 11-1.04-1.08l2.158-1.96H5.75A.75.75 0 015 10z" clip-rule="evenodd" />
+                                        </svg>
+                                    </NavLink>
+                                    <NavLink v-if="$page.props.auth.user.user_type == 'group_admin'" :href="route('group-index')" class="inline-flex items-center font-semibold text-indigo-700">
                                         Explore the Groups Menu
 
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="ml-1 w-5 h-5 fill-indigo-500">
@@ -123,7 +141,7 @@ const props = defineProps({
                                 </div>
 
                                 <p class="mt-4 text-gray-500 text-sm leading-relaxed">
-                                    Assign and remove users from Group here. As Admin, you have privilege to this feature.
+                                    View Users details here. As <span v-if="$page.props.auth.user.user_type == 'super_admin'">Super</span> Admin, you have privilege to this feature.
                                 </p>
 
                                 <p class="mt-4 text-sm">
@@ -152,12 +170,12 @@ const props = defineProps({
                                 </div>
 
                                 <p class="mt-4 text-gray-500 text-sm leading-relaxed">
-                                    View and edit group admins here. As Super Admin, you have privilege to this feature.
+                                    View and edit admins per group. As Super Admin, you can do it.
                                 </p>
 
                                 <p class="mt-4 text-sm">
-                                    <NavLink :href="route('dashboard')" class="inline-flex items-center font-semibold text-indigo-700">
-                                        Explore the Group Admin Menu
+                                    <NavLink :href="route('groups-index')" class="inline-flex items-center font-semibold text-indigo-700">
+                                        Explore the Groups Menu
 
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="ml-1 w-5 h-5 fill-indigo-500">
                                             <path fill-rule="evenodd" d="M5 10a.75.75 0 01.75-.75h6.638L10.23 7.29a.75.75 0 111.04-1.08l3.5 3.25a.75.75 0 010 1.08l-3.5 3.25a.75.75 0 11-1.04-1.08l2.158-1.96H5.75A.75.75 0 015 10z" clip-rule="evenodd" />
