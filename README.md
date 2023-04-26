@@ -39,3 +39,10 @@ All seeded users have
 - Roles and Permissions
 - Laravel Inertia with Vue3
 - Tailwind CSS
+
+#### COMING SOON
+- Users Menu for Admins
+- Separate Log in Page for User and Admin
+- Filter vouchers list by groups
+- Unit Testing
+- Broadcasting for real time changes
