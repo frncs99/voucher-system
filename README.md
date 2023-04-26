@@ -22,6 +22,7 @@
 - Execute the command `php artisan db:seed` to initially load the database tables
 - Execute the command `npm install` to insall the (front) project dependencies
 - Execute the command `npm run build` to build the UI
+- Execute the command `php artisan serve`
 
 Go to http://localhost:8000/
 
