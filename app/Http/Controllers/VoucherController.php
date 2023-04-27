@@ -162,7 +162,7 @@ class VoucherController extends Controller implements ExportVoucherInterface
             return redirect()->route('vouchers-index')->withErrors($remove['message']->getMessage(), 'error');
         }
 
-        return redirect()->route('vouchers-index');
+        return response(["status" => $remove['success']], 200);
     }
 
     public function export()

@@ -47,20 +47,22 @@ function edit(id) {
 
 function destroy(isDelete, id) {
     if (confirm("Are you sure you want to " + (isDelete ? "delete?" : "restore?"))) {
-        router.delete(route('groups-destroy', id), {
-            onSuccess: (response) => {
-                Toast.fire({
-                    icon: 'success',
-                    title: 'Group ' + (isDelete ? "deleted" : "restored") + ' successfully.',
-                });
-            },
-            onError: (response) => {
-                Toast.fire({
-                    icon: 'error',
-                    title: 'Failed deleting Group.',
-                    text: JSON.stringify(response.error),
-                });
-            }
+        axios.delete(
+            route('groups-destroy', id)
+        )
+        .then((response) => {
+            Toast.fire({
+                icon: 'success',
+                title: 'Group ' + (isDelete ? "deleted" : "restored") + ' successfully.',
+            });
+
+            router.get(window.location.href);
+        }).catch(error => {
+            Toast.fire({
+                icon: 'error',
+                title: 'Failed ' + (isDelete ? "deleting" : "restoring") + ' Group.',
+                text: JSON.stringify(error.message),
+            });
         });
     }
 }

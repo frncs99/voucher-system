@@ -50,16 +50,25 @@ const check = reactive({
 });
 
 const checkCurrentGroup = () => {
-    axios.get(route('group-member-current-group', form.user_id))
-        .then(response => {
-            if (response.data[0]) {
-                check.currentGroup = response.data[0];
-                check.belongToAGroup = true;
-            } else {
-                check.currentGroup = '';
-                check.belongToAGroup = false;
-            }
+    axios.get(
+        route('group-member-current-group', form.user_id)
+    ).then(response => {
+        if (response.data[0]) {
+            check.currentGroup = response.data[0];
+            check.belongToAGroup = true;
+        } else {
+            check.currentGroup = '';
+            check.belongToAGroup = false;
+        }
+    }).catch(error => {
+        check.currentGroup = '';
+        check.belongToAGroup = false;
+
+        Toast.fire({
+            icon: 'error',
+            title: 'Error fetching user info. Please reselect.',
         });
+    });
 };
 
 const createMember = () => {

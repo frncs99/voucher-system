@@ -53,20 +53,22 @@ const Toast = Swal.mixin({
 
 function destroy(id) {
     if (confirm("Are you sure you want to delete?")) {
-        router.delete(route('vouchers-destroy', id), {
-            onSuccess: (response) => {
-                Toast.fire({
-                    icon: 'success',
-                    title: 'Voucher deleted successfully.'
-                });
-            },
-            onError: (response) => {
-                Toast.fire({
-                    icon: 'error',
-                    title: 'Failed deleting Voucher.',
-                    text: JSON.stringify(response.error),
-                });
-            }
+        axios.delete(
+            route('vouchers-destroy', id)
+        )
+        .then((response) => {
+            Toast.fire({
+                icon: 'success',
+                title: 'Voucher deleted successfully.'
+            });
+
+            router.get(window.location.href);
+        }).catch(error => {
+            Toast.fire({
+                icon: 'error',
+                title: 'Failed deleting Voucher.',
+                text: JSON.stringify(error.message),
+            });
         });
     }
 }
