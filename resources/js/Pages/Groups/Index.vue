@@ -38,7 +38,7 @@ function assignAdmin(id) {
 }
 
 function assignMembers(id) {
-    router.get(route('group-member', id));
+    router.get(route('groups-member', id));
 }
 
 function edit(id) {

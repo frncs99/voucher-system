@@ -51,7 +51,7 @@ const check = reactive({
 
 const checkCurrentGroup = () => {
     axios.get(
-        route('group-member-current-group', form.user_id)
+        route('groups-member-current-group', form.user_id)
     ).then(response => {
         if (response.data[0]) {
             check.currentGroup = response.data[0];
@@ -72,7 +72,7 @@ const checkCurrentGroup = () => {
 };
 
 const createMember = () => {
-    form.post(route('group-member-add', props.group.group_id), {
+    form.post(route('groups-member-add', props.group.group_id), {
         preserveScroll: true,
         onSuccess: (response) => {
             form.reset();

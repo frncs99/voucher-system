@@ -57,11 +57,11 @@ Route::middleware([
 
     // GROUP MEMBER
     Route::get('/group', [GroupController::class, "index"])->name('group-index')->middleware(['can:assign-group-member']);
-    Route::get('/group/member/check-group/{id}', [GroupController::class, "checkCurrentGroup"])->name('group-member-current-group')->middleware(['can:assign-group-member']);
-    Route::get('/group/member/{id}', [GroupController::class, "getMembers"])->name('group-member')->middleware(['can:assign-group-member']);
-    Route::patch('/group/member/assign/{id}', [GroupController::class, "assignMember"])->name('group-assign-member')->middleware(['can:assign-group-member']);
-    Route::get('/group/member/create/{id}', [GroupController::class, "createNewMember"])->name('group-new-member')->middleware(['can:assign-group-member']);
-    Route::post('/group/member/store/{id}', [GroupController::class, "storeNewMember"])->name('group-member-add')->middleware(['can:assign-group-member']);
+    Route::get('/groups/member/check-group/{id}', [GroupController::class, "checkCurrentGroup"])->name('groups-member-current-group')->middleware(['can:assign-group-member']);
+    Route::get('/groups/member/{id}', [GroupController::class, "getMembers"])->name('groups-member')->middleware(['can:assign-group-member']);
+    Route::patch('/groups/member/assign/{id}', [GroupController::class, "assignMember"])->name('groups-assign-member')->middleware(['can:assign-group-member']);
+    Route::get('/groups/member/create/{id}', [GroupController::class, "createNewMember"])->name('groups-new-member')->middleware(['can:assign-group-member']);
+    Route::post('/groups/member/store/{id}', [GroupController::class, "storeNewMember"])->name('groups-member-add')->middleware(['can:assign-group-member']);
 });
 
 

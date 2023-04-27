@@ -30,13 +30,13 @@ const Toast = Swal.mixin({
 
 function addMembers() {
     let id = window.location.href.split("/").pop();
-    router.get(route('group-new-member', id));
+    router.get(route('groups-new-member', id));
 }
 
 function assign(isDelete, id) {
     if (confirm("Are you sure you want to " + (isDelete ? "remove?" : "restore?"))) {
         axios.patch(
-            route('group-assign-member', id)
+            route('groups-assign-member', id)
         )
         .then((response) => {
             Toast.fire({
