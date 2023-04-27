@@ -20,26 +20,16 @@ class VoucherService extends BaseService
         parent::__construct($model);
 
         // column use for sorting
-        $this->defaultSortKey = ["voucher_id"] ;
+        $this->defaultSortKey = ["voucher_id"];
 
         // column use for sorting
-        $this->tableName = ["vouchers"] ;
+        $this->tableName = ["vouchers"];
 
         // validator class for the controller
         // $this->requestValidator = new VoucherRequest();
 
         // model resource for response formatting
-        // $this->modelResource = "App\Http\Resources\VoucherResource";
-    }
-
-    public function paginateQueryWithoutModelResource($query, $count)
-    {
-        $originalModelResource = $this->modelResource;
-        $this->modelResource = null;
-        $query = $this->allWithPagination($query, $count);
-        $this->modelResource = $originalModelResource;
-
-        return $query;
+        $this->modelResource = "App\Http\Resources\VoucherResource";
     }
 
     public function getUserGroup(int $userId)
@@ -92,7 +82,7 @@ class VoucherService extends BaseService
         }
 
         return [
-            'vouchers' => $this->paginateQueryWithoutModelResource($vouchers, 5, '', null),
+            'vouchers' => $this->allWithPagination($vouchers),
             'limit' => $addIsOnLimit ?? false
         ];
     }
@@ -128,7 +118,7 @@ class VoucherService extends BaseService
             );
 
         return [
-            'vouchers' => $this->paginateQueryWithoutModelResource(
+            'vouchers' => $this->allWithPagination(
                     $vouchers->select(
                         'vouchers.created_at',
                         'vouchers.voucher_id',
@@ -137,8 +127,7 @@ class VoucherService extends BaseService
                         'users.name',
                         'groups.name as group_name',
                         'group_members.is_active',
-                    ),
-                    5,
+                    )
                 ),
             'groups' => $vouchers->select(
                     'groups.name',
@@ -179,7 +168,7 @@ class VoucherService extends BaseService
             );
 
         return [
-            'vouchers' => $this->paginateQueryWithoutModelResource($vouchers, 5)
+            'vouchers' => $this->allWithPagination($vouchers)
         ];
     }
 

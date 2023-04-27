@@ -65,6 +65,11 @@ const logout = () => {
                                     Groups
                                 </NavLink>
                             </div>
+                            <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
+                                <NavLink :href="route('users')" :active="route().current('users')">
+                                    Users
+                                </NavLink>
+                            </div>
                         </div>
 
                         <div class="hidden sm:flex sm:items-center sm:ml-6">
@@ -215,6 +220,9 @@ const logout = () => {
                         </ResponsiveNavLink>
                         <ResponsiveNavLink v-if="$page.props.auth.user.user_type == 'group_admin'" :href="route('group-index')" :active="route().current('groups-new-member') || route().current('groups-member') || route().current('group-index')">
                             Groups
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink :href="route('users')" :active="route().current('users')">
+                            Users
                         </ResponsiveNavLink>
                     </div>
 

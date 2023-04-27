@@ -135,7 +135,7 @@ const props = defineProps({
                                         <p>
                                             Number of
                                             <br />
-                                            USERS
+                                            USERS <span v-if="$page.props.auth.user.user_type == 'group_admin'">(under your group/s)</span>
                                         </p>
                                     </h2>
                                 </div>
@@ -145,7 +145,7 @@ const props = defineProps({
                                 </p>
 
                                 <p class="mt-4 text-sm">
-                                    <NavLink :href="route('dashboard')" class="inline-flex items-center font-semibold text-indigo-700">
+                                    <NavLink :href="route('users')" class="inline-flex items-center font-semibold text-indigo-700">
                                         Explore the Users Menu
 
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="ml-1 w-5 h-5 fill-indigo-500">

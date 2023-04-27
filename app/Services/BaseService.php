@@ -96,11 +96,6 @@ class BaseService
                 $queryResult = $queryResult->get();
             }
 
-            // resource
-            if ($this->modelResource) {
-                return $this->modelResource::collection($queryResult);
-            }
-
             return $queryResult;
         } else {
             $queryResult = $orderResult;
@@ -125,13 +120,6 @@ class BaseService
             $result = $orderResult->paginate($pageLength);
         } else {
             $result = $orderResult->get();
-        }
-
-        /**
-         * return data
-         */
-        if ($this->modelResource) {
-            return $this->modelResource::collection($result);
         }
 
         return $result;

@@ -13,16 +13,16 @@ class GroupService extends BaseService
         parent::__construct($model);
 
         // column use for sorting
-        $this->defaultSortKey = ["group_id"] ;
+        $this->defaultSortKey = ["group_id"];
 
         // column use for sorting
-        $this->tableName = ["groups"] ;
+        $this->tableName = ["groups"];
 
         // validator class for the controller
         // $this->requestValidator = new GroupStoreRequest();
         // $this->requestValidator = new GroupUpdateRequest();
 
         // model resource for response formatting
-        // $this->modelResource = "App\Http\Resources\GroupResource";
+        $this->modelResource = "App\Http\Resources\GroupResource";
     }
 }

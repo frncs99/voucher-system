@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GroupController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\VoucherController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -62,6 +63,9 @@ Route::middleware([
     Route::patch('/groups/member/assign/{id}', [GroupController::class, "assignMember"])->name('groups-assign-member')->middleware(['can:assign-group-member']);
     Route::get('/groups/member/create/{id}', [GroupController::class, "createNewMember"])->name('groups-new-member')->middleware(['can:assign-group-member']);
     Route::post('/groups/member/store/{id}', [GroupController::class, "storeNewMember"])->name('groups-member-add')->middleware(['can:assign-group-member']);
+    
+    // USERS
+    Route::get('/users', [UserController::class, "index"])->name('users')->middleware(['can:view-users']);
 });
 
 

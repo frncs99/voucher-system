@@ -266,6 +266,6 @@ class GroupController extends Controller implements GroupAssigningAdminInterface
             return redirect()->route('groups-new-member', $id)->withErrors($ex->getMessage(), 'error');
         }
 
-        return redirect()->route('group-members', $id);
+        return redirect()->route('groups-member', $id);
     }
 }

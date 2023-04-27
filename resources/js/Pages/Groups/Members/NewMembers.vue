@@ -47,6 +47,7 @@ const form = useForm({
 const check = reactive({
     currentGroup:'',
     belongToAGroup: false,
+    allowsaveBtn: true,
 });
 
 const checkCurrentGroup = () => {
@@ -60,6 +61,10 @@ const checkCurrentGroup = () => {
             check.currentGroup = '';
             check.belongToAGroup = false;
         }
+
+        if (response.data[0] == props.group.name) {
+            check.allowsaveBtn = false;
+        } else check.allowsaveBtn = true;
     }).catch(error => {
         check.currentGroup = '';
         check.belongToAGroup = false;
@@ -68,6 +73,8 @@ const checkCurrentGroup = () => {
             icon: 'error',
             title: 'Error fetching user info. Please reselect.',
         });
+
+        check.allowsaveBtn = false;
     });
 };
 
@@ -96,7 +103,7 @@ const createMember = () => {
     <AppLayout title="Groups">
         <template #header>
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                <BackButton /> &nbsp; CREATE NEW MEMBER &nbsp;
+                <BackButton /> &nbsp; ADD NEW MEMBER &nbsp;
 
                 <span style="float: right;"><TimeStamp /> <RefreshPage /></span>
             </h2>
@@ -109,18 +116,19 @@ const createMember = () => {
                         <div class="p-6 bg-white border-b border-gray-200">
                             <FormSection @submitted="createMember">
                                 <template #title>
-                                    Create a New Member
+                                    Add a New Member
                                 </template>
 
                                 <template #description>
-                                    Select User to be assigned to a Group named: <b>{{ group.name }}</b>.
+                                    Select a User to be assigned to the Group <b>{{ group.name }}</b>.
 
                                     <p class="mt-2">
-                                        Note: User can only belong to one group, assigning them to {{ group.name }} will result of their eviction from their current group.
+                                        Note: User can only belong to one group, assigning them to "{{ group.name }}" will result of their eviction from their current group.
                                     </p>
 
                                     <p class="mt-2" v-if="check.belongToAGroup">
-                                        <b>The selected user will be evicted from {{ check.currentGroup }}.</b>
+                                        <b v-if="check.currentGroup != group.name">The selected user will be evicted from {{ check.currentGroup }}.</b>
+                                        <b v-else>The selected user is already a member of the {{ group.name }}</b>
                                     </p>
                                 </template>
 
@@ -142,7 +150,10 @@ const createMember = () => {
                                         Saved.
                                     </ActionMessage>
 
-                                    <PrimaryButton :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
+                                    <PrimaryButton v-if="check.allowsaveBtn" :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
+                                        Save
+                                    </PrimaryButton>
+                                    <PrimaryButton v-else class="opacity-25" :disabled="true">
                                         Save
                                     </PrimaryButton>
                                 </template>
