@@ -41,6 +41,7 @@ All seeded users have
 - Tailwind CSS
 
 #### COMING SOON
+- Replace router with axios
 - Users Menu for Admins
 - Separate Log in Page for User and Admin
 - Filter vouchers list by groups
