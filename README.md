@@ -24,7 +24,7 @@
 - Execute the command `npm run build` to build the UI
 - Execute the command `php artisan serve`
 
-Go to http://localhost:8000/
+Go to http://127.0.0.1:8000/
 
 Use the following credentials (seeded data)
 - Super Admin Email: `superadmin@example.com`
