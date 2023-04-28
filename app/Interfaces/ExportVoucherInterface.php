@@ -3,5 +3,5 @@
 namespace App\Interfaces;
 
 interface ExportVoucherInterface {
-    public function export();
+    public function export(int $groupId);
 }

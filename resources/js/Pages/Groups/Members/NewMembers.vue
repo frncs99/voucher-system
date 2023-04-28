@@ -134,7 +134,7 @@ const createMember = () => {
 
                                 <template #form>
                                     <div class="col-span-6 sm:col-span-4">
-                                        <InputLabel for="user_admin_id" value="NAME" />
+                                        <InputLabel for="user_id" value="NAME" />
                                         <select @change="checkCurrentGroup()" v-model="form.user_id" class="mt-2 block appearance-none w-full bg-white border text-slate text-sm py-3 px-4 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray">
                                             <option v-for="item in users" :value="item.id" :key="item.id" class="text-slate text-sm">
                                                 {{ item.name }} ({{ item.email }})

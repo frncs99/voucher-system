@@ -42,6 +42,5 @@ All seeded users have
 
 #### COMING SOON
 - Separate Log in Page for User and Admin
-- Filter vouchers list by groups
 - Unit Testing
 - Broadcasting for real time changes

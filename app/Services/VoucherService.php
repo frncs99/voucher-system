@@ -10,6 +10,7 @@ use App\Models\GroupMember;
 use App\Models\User;
 use App\Models\Voucher;
 use App\Services\BaseService;
+use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
 
 class VoucherService extends BaseService
@@ -48,24 +49,35 @@ class VoucherService extends BaseService
             ->first();
     }
 
-    public function getAdminGroup(int $groupAdminId)
+    public function getAdminGroup(int $groupAdminId, $withId = false)
     {
-        return GroupAdmin::where('user_admin_id', $groupAdminId)
+        $groups = GroupAdmin::where('user_admin_id', $groupAdminId)
             ->where('is_active', 1)
             ->join(
                 'groups',
                 'groups.group_id',
                 '=',
                 'group_admins.group_id'
-            )
-            ->pluck('groups.name')
-            ->toArray();
+            );
+
+        if ($withId) {
+            return $groups->select('groups.name', 'groups.group_id')
+                ->get();
+        } else {
+            return $groups->pluck('groups.name')
+                ->toArray();
+        }
     }
 
-    public function getAllGroup()
+    public function getAllGroup($withId = false)
     {
-        return Group::pluck('name')
-            ->toArray();
+        if ($withId) {
+            return Group::select('name', 'group_id')
+                ->get();
+        } else {
+            return Group::pluck('name')
+                ->toArray();
+        }
     }
 
     public function getUserVoucher(int $userId)
@@ -87,11 +99,25 @@ class VoucherService extends BaseService
         ];
     }
 
-    public function getUserVoucherByGroups(int $groupAdminId)
+    public function getUserVoucherByGroups(int $groupAdminId, $specificGroupId = null)
     {
-        $vouchers = GroupAdmin::where('group_members.is_active', 1)
+        $vouchers = GroupAdmin::select(
+                'vouchers.created_at',
+                'vouchers.voucher_id',
+                'vouchers.code',
+                'users.email',
+                'users.name',
+                'groups.name as group_name',
+                'group_members.is_active',
+            )
+            ->where('group_members.is_active', 1)
             ->where('group_admins.is_active', 1)
             ->where('user_admin_id', $groupAdminId)
+            ->where(function ($query) use ($specificGroupId) {
+                if ($specificGroupId != null) {
+                    $query->where('groups.group_id', $specificGroupId);
+                }
+            })
             ->join(
                 'groups',
                 'groups.group_id',
@@ -118,26 +144,11 @@ class VoucherService extends BaseService
             );
 
         return [
-            'vouchers' => $this->allWithPagination(
-                    $vouchers->select(
-                        'vouchers.created_at',
-                        'vouchers.voucher_id',
-                        'vouchers.code',
-                        'users.email',
-                        'users.name',
-                        'groups.name as group_name',
-                        'group_members.is_active',
-                    )
-                ),
-            'groups' => $vouchers->select(
-                    'groups.name',
-                )
-                ->groupBy('groups.name')
-                ->pluck('groups.name'),
+            'vouchers' => $this->allWithPagination($vouchers),
         ];
     }
 
-    public function getAllUserVouchers()
+    public function getAllUserVouchers($specificGroupId = null)
     {
         $vouchers = $this->model::select(
                 'vouchers.created_at',
@@ -148,6 +159,11 @@ class VoucherService extends BaseService
                 'users.email',
                 'users.name',
             )
+            ->where(function ($query) use ($specificGroupId) {
+                if ($specificGroupId != null) {
+                    $query->where('groups.group_id', $specificGroupId);
+                }
+            })
             ->join(
                 'group_members',
                 'group_members.user_id',
@@ -212,16 +228,7 @@ class VoucherService extends BaseService
 
     public function getAllUserVouchersCounts()
     {
-        return $this->model::select(
-                'vouchers.created_at',
-                'vouchers.voucher_id',
-                'vouchers.code',
-                'groups.name as group_name',
-                'group_members.is_active',
-                'users.email',
-                'users.name',
-            )
-            ->join(
+        return $this->model::join(
                 'group_members',
                 'group_members.user_id',
                 '=',
@@ -268,8 +275,10 @@ class VoucherService extends BaseService
         return $subject . '.xlsx';
     }
 
-    public function exportUserVoucherByGroups(int $groupAdminId)
+    public function exportUserVoucherByGroups($specificGroupId = 0)
     {
+        $userId = Auth::user()->id;
+
         $vouchers = GroupAdmin::select(
                 'vouchers.created_at',
                 'vouchers.voucher_id',
@@ -280,7 +289,12 @@ class VoucherService extends BaseService
             )
             ->where('group_members.is_active', 1)
             ->where('group_admins.is_active', 1)
-            ->where('user_admin_id', $groupAdminId)
+            ->where('user_admin_id', $userId)
+            ->where(function ($query) use ($specificGroupId) {
+                if ($specificGroupId != 0) {
+                    $query->where('groups.group_id', $specificGroupId);
+                }
+            })
             ->join(
                 'groups',
                 'groups.group_id',
@@ -310,7 +324,7 @@ class VoucherService extends BaseService
         return $this->exportToExcel($vouchers, 'Vouchers_' . date('YmdHis'));
     }
 
-    public function exportAllUserVouchers()
+    public function exportAllUserVouchers($specificGroupId = 0)
     {
         $vouchers = $this->model::select(
                 'vouchers.created_at',
@@ -321,6 +335,11 @@ class VoucherService extends BaseService
                 'users.email',
                 'users.name',
             )
+            ->where(function ($query) use ($specificGroupId) {
+                if ($specificGroupId != 0) {
+                    $query->where('groups.group_id', $specificGroupId);
+                }
+            })
             ->join(
                 'group_members',
                 'group_members.user_id',

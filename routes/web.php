@@ -36,7 +36,8 @@ Route::middleware([
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // VOUCHERS
-    Route::get('/vouchers', [VoucherController::class, "index"])->name('vouchers-index')->middleware(['can:view-voucher']);
+    Route::get('/vouchers/group', [VoucherController::class, "preIndex"])->name('vouchers-preindex')->middleware(['can:view-voucher']);
+    Route::get('/vouchers/group/{id}', [VoucherController::class, "index"])->name('vouchers-index')->middleware(['can:view-voucher']);
     Route::delete('/vouchers/{id}', [VoucherController::class, "destroy"])->name('vouchers-destroy')->middleware(['can:delete-voucher']);
     Route::get('/vouchers/create', [VoucherController::class, "create"])->name('vouchers-create')->middleware(['can:create-voucher']);
     Route::post('/vouchers', [VoucherController::class, "store"])->name('vouchers-store')->middleware(['can:create-voucher']);
