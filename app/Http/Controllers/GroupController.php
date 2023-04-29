@@ -156,8 +156,7 @@ class GroupController extends Controller implements GroupAssigningAdminInterface
     
     public function getAdmin(int $groupId)
     {
-        $admins = GroupAdmin::where('group_id', $groupId)
-            ->get();
+        $admins = GroupAdmin::where('group_id', $groupId)->get();
         
         return Inertia::render('Groups/Admins', [
             'groupAdmins' => GroupAdminResource::collection($admins),
@@ -210,7 +209,6 @@ class GroupController extends Controller implements GroupAssigningAdminInterface
     public function getMembers(int $groupId)
     {
         $members = GroupMember::where('group_id', $groupId)
-            // ->where('is_active', 1)
             ->get();
             
         return Inertia::render('Groups/Members/Members', [
