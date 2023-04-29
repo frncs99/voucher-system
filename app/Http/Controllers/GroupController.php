@@ -127,7 +127,7 @@ class GroupController extends Controller implements GroupAssigningAdminInterface
                 'Error' => $update
             ]);
 
-            return redirect()->route('groups-create')->withErrors($update['message']->getMessage(), 'error');
+            return redirect()->route('groups-edit')->withErrors($update['message']->getMessage(), 'error');
         }
 
         return redirect()->route('groups-index');
@@ -148,16 +148,15 @@ class GroupController extends Controller implements GroupAssigningAdminInterface
                 'Error' => $deleteOrRestore
             ]);
 
-            return redirect()->route('groups-index')->withErrors($deleteOrRestore['message']->getMessage(), 'error');
+            return response(["message" => $deleteOrRestore['message']->getMessage()], 422);
         }
 
-        return redirect()->route('groups-index');
+        return response(["status" => $deleteOrRestore['success']], 200);
     }
     
     public function getAdmin(int $groupId)
     {
-        $admins = GroupAdmin::where('group_id', $groupId)
-            ->get();
+        $admins = GroupAdmin::where('group_id', $groupId)->get();
         
         return Inertia::render('Groups/Admins', [
             'groupAdmins' => GroupAdminResource::collection($admins),
@@ -171,10 +170,10 @@ class GroupController extends Controller implements GroupAssigningAdminInterface
             $admin->is_active = ($admin->is_active == 1) ? 0 : 1;
             $admin->save();
         } catch (Exception $ex) {
-            return redirect()->route('groups-index')->withErrors($ex->getMessage(), 'error');
+            return response(["error" => $ex->getMessage()], 422);
         }
 
-        return redirect()->route('groups-admin', $admin->group_id);
+        return response(["status" => $admin->is_active], 200);
     }
 
     public function createNewAdmin(int $groupId)
@@ -183,7 +182,7 @@ class GroupController extends Controller implements GroupAssigningAdminInterface
         $admins = User::select('id', 'email', 'name')->where('user_type', 'group_admin')->get();
         
         return Inertia::render('Groups/NewAdmins', [
-            'group' => $group, 
+            'group' => $group,
             'admins' => $admins,
         ]);
     }
@@ -210,7 +209,6 @@ class GroupController extends Controller implements GroupAssigningAdminInterface
     public function getMembers(int $groupId)
     {
         $members = GroupMember::where('group_id', $groupId)
-            // ->where('is_active', 1)
             ->get();
             
         return Inertia::render('Groups/Members/Members', [
@@ -225,10 +223,10 @@ class GroupController extends Controller implements GroupAssigningAdminInterface
             $member->is_active = ($member->is_active == 1) ? 0 : 1;
             $member->save();
         } catch (Exception $ex) {
-            return redirect()->route('group-index')->withErrors($ex->getMessage(), 'error');
+            return response(["message" => $ex->getMessage()], 422);
         }
 
-        return redirect()->route('group-member', $member->group_id);
+        return response(["status" => $member->is_active], 200);
     }
 
     public function createNewMember(int $groupId)
@@ -263,9 +261,9 @@ class GroupController extends Controller implements GroupAssigningAdminInterface
             $groupMember->is_active = 1;
             $groupMember->save();
         } catch (Exception $ex) {
-            return redirect()->route('group-new-member', $id)->withErrors($ex->getMessage(), 'error');
+            return redirect()->route('groups-new-member', $id)->withErrors($ex->getMessage(), 'error');
         }
 
-        return redirect()->route('group-member', $id);
+        return redirect()->route('groups-member', $id);
     }
 }

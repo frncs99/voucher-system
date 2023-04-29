@@ -53,20 +53,22 @@ const Toast = Swal.mixin({
 
 function destroy(id) {
     if (confirm("Are you sure you want to delete?")) {
-        router.delete(route('vouchers-destroy', id), {
-            onSuccess: (response) => {
-                Toast.fire({
-                    icon: 'success',
-                    title: 'Voucher deleted successfully.'
-                });
-            },
-            onError: (response) => {
-                Toast.fire({
-                    icon: 'error',
-                    title: 'Failed deleting Voucher.',
-                    text: JSON.stringify(response.error),
-                });
-            }
+        axios.delete(
+            route('vouchers-destroy', id)
+        )
+        .then((response) => {
+            Toast.fire({
+                icon: 'success',
+                title: 'Voucher deleted successfully.'
+            });
+
+            router.get(window.location.href);
+        }).catch(error => {
+            Toast.fire({
+                icon: 'error',
+                title: 'Failed deleting Voucher.',
+                text: JSON.stringify(error.message),
+            });
         });
     }
 }
@@ -86,10 +88,12 @@ function checkLimit() {
 }
 
 function exportToExcel() {
+    let groupId = window.location.pathname.substring(window.location.pathname.lastIndexOf('/') + 1);
+
     var loading = document.getElementById('exportLoadingIcon');
     loading.style = "display: ";
     let filename = '';
-    fetch(route('vouchers-export', { id: props.userId }))
+    fetch(route('vouchers-export', { id: groupId }))
         .then((res) => {
             let header = res.headers.get('Content-Disposition');
             let parts = header.split(';');
@@ -136,7 +140,7 @@ function exportToExcel() {
                                 <Button class="mr-2" @click="checkLimit()">Add Voucher</Button>
                             </div>
                             <div v-else class="mb-2">
-                                <Button class="mr-2" @click="exportToExcel()">
+                                <Button v-if="vouchers && vouchers.data.length > 0" class="mr-2" @click="exportToExcel()">
                                     Export
                                     <div style="display: none;" id="exportLoadingIcon" role="status">
                                         <svg aria-hidden="true" class="inline w-4 h-4 ml-2 text-gray-200 animate-spin dark:text-gray-600 fill-gray-600 dark:fill-gray-300" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">

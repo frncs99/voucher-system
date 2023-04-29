@@ -53,16 +53,21 @@ const logout = () => {
                                 </NavLink>
                             </div>
                             <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
-                                <NavLink :href="route('vouchers-index')" :active="route().current('vouchers-index') || route().current('vouchers-create')">
+                                <NavLink :href="route('vouchers-preindex')" :active="route().current('vouchers-preindex') || route().current('vouchers-index') || route().current('vouchers-create')">
                                     Vouchers
                                 </NavLink>
                             </div>
-                            <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
-                                <NavLink v-if="$page.props.auth.user.user_type == 'super_admin'" :href="route('groups-index')" :active="route().current('group-new-member') || route().current('group-member') || route().current('groups-admin') || route().current('groups-new-admin') || route().current('groups-index') || route().current('groups-create') || route().current('groups-edit') || route().current('groups-assign')">
+                            <div v-if="$page.props.auth.user.user_type != 'user'" class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
+                                <NavLink v-if="$page.props.auth.user.user_type == 'super_admin'" :href="route('groups-index')" :active="route().current('groups-new-member') || route().current('groups-member') || route().current('groups-admin') || route().current('groups-new-admin') || route().current('groups-index') || route().current('groups-create') || route().current('groups-edit') || route().current('groups-assign')">
                                     Groups
                                 </NavLink>
-                                <NavLink v-if="$page.props.auth.user.user_type == 'group_admin'" :href="route('group-index')" :active="route().current('group-new-member') || route().current('group-member') || route().current('group-index')">
+                                <NavLink v-if="$page.props.auth.user.user_type == 'group_admin'" :href="route('group-index')" :active="route().current('groups-new-member') || route().current('groups-member') || route().current('group-index')">
                                     Groups
+                                </NavLink>
+                            </div>
+                            <div v-if="$page.props.auth.user.user_type != 'user'" class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
+                                <NavLink :href="route('users')" :active="route().current('users')">
+                                    Users
                                 </NavLink>
                             </div>
                         </div>
@@ -207,14 +212,17 @@ const logout = () => {
                         <ResponsiveNavLink :href="route('dashboard')" :active="route().current('dashboard')">
                             Dashboard
                         </ResponsiveNavLink>
-                        <ResponsiveNavLink :href="route('vouchers-index')" :active="route().current('vouchers-index') || route().current('vouchers-create')">
+                        <ResponsiveNavLink :href="route('vouchers-preindex')" :active="route().current('vouchers-preindex') || route().current('vouchers-index') || route().current('vouchers-create')">
                             Vouchers
                         </ResponsiveNavLink>
-                        <ResponsiveNavLink v-if="$page.props.auth.user.user_type == 'super_admin'" :href="route('groups-index')" :active="route().current('group-new-member') || route().current('group-member') || route().current('groups-admin') || route().current('groups-new-admin') || route().current('groups-index') || route().current('groups-create') || route().current('groups-edit') || route().current('groups-assign')">
+                        <ResponsiveNavLink v-if="$page.props.auth.user.user_type == 'super_admin'" :href="route('groups-index')" :active="route().current('groups-new-member') || route().current('groups-member') || route().current('groups-admin') || route().current('groups-new-admin') || route().current('groups-index') || route().current('groups-create') || route().current('groups-edit') || route().current('groups-assign')">
                             Groups
                         </ResponsiveNavLink>
-                        <ResponsiveNavLink v-if="$page.props.auth.user.user_type == 'group_admin'" :href="route('group-index')" :active="route().current('group-new-member') || route().current('group-member') || route().current('group-index')">
+                        <ResponsiveNavLink v-if="$page.props.auth.user.user_type == 'group_admin'" :href="route('group-index')" :active="route().current('groups-new-member') || route().current('groups-member') || route().current('group-index')">
                             Groups
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink v-if="$page.props.auth.user.user_type != 'user'" :href="route('users')" :active="route().current('users')">
+                            Users
                         </ResponsiveNavLink>
                     </div>
 

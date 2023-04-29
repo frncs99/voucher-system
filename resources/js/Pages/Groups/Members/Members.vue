@@ -30,16 +30,28 @@ const Toast = Swal.mixin({
 
 function addMembers() {
     let id = window.location.href.split("/").pop();
-    router.get(route('group-new-member', id));
+    router.get(route('groups-new-member', id));
 }
 
 function assign(isDelete, id) {
     if (confirm("Are you sure you want to " + (isDelete ? "remove?" : "restore?"))) {
-        router.patch(route('group-assign-member', id));
+        axios.patch(
+            route('groups-assign-member', id)
+        )
+        .then((response) => {
+            Toast.fire({
+                icon: 'success',
+                title: 'Group Member ' + (isDelete ? "removed" : "restored") + ' successfully.',
+            });
 
-        Toast.fire({
-            icon: 'success',
-            title: 'Group Member ' + (isDelete ? "removed" : "restored") + ' successfully.',
+            router.get(window.location.href);
+        }).catch(error => {
+            console.log(error);
+            Toast.fire({
+                icon: 'error',
+                title: 'Failed ' + (isDelete ? "removing" : "restoring") + ' Group Member.',
+                text: JSON.stringify(error.message),
+            });
         });
     }
 }

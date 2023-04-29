@@ -1,7 +1,10 @@
 <?php
 
+use App\Http\Controllers\Auth\AdminAuthenticateSessionController;
+use App\Http\Controllers\Auth\UserAuthenticateSessionController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GroupController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\VoucherController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -27,15 +30,37 @@ Route::get('/', function () {
     ]);
 });
 
+// USER LOGIN ROUTE
+Route::get('/login', [UserAuthenticateSessionController::class, 'create'])
+    ->middleware(['guest:'.config('fortify.guard')])
+    ->name('login');
+Route::post('/login', [UserAuthenticateSessionController::class, 'store'])
+    ->middleware(array_filter([
+        'guest:'.config('fortify.guard'),
+        config('fortify.limiters.login') ? 'throttle:'.config('fortify.limiters.login') : null,
+    ]));
+
+// ADMIN LOGIN ROUTE
+Route::get('/admin/login', [AdminAuthenticateSessionController::class, 'create'])
+    ->middleware(['guest:'.config('fortify.guard')])
+    ->name('admin-login');
+Route::post('/admin/login', [AdminAuthenticateSessionController::class, 'store'])
+    ->middleware(array_filter([
+        'guest:'.config('fortify.guard'),
+        config('fortify.limiters.login') ? 'throttle:'.config('fortify.limiters.login') : null,
+    ]));
+
 Route::middleware([
     'auth:sanctum',
     config('jetstream.auth_session'),
     'verified',
 ])->group(function () {
+    // DASHBOARD
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // VOUCHERS
-    Route::get('/vouchers', [VoucherController::class, "index"])->name('vouchers-index')->middleware(['can:view-voucher']);
+    Route::get('/vouchers/group', [VoucherController::class, "preIndex"])->name('vouchers-preindex')->middleware(['can:view-voucher']);
+    Route::get('/vouchers/group/{id}', [VoucherController::class, "index"])->name('vouchers-index')->middleware(['can:view-voucher']);
     Route::delete('/vouchers/{id}', [VoucherController::class, "destroy"])->name('vouchers-destroy')->middleware(['can:delete-voucher']);
     Route::get('/vouchers/create', [VoucherController::class, "create"])->name('vouchers-create')->middleware(['can:create-voucher']);
     Route::post('/vouchers', [VoucherController::class, "store"])->name('vouchers-store')->middleware(['can:create-voucher']);
@@ -57,11 +82,14 @@ Route::middleware([
 
     // GROUP MEMBER
     Route::get('/group', [GroupController::class, "index"])->name('group-index')->middleware(['can:assign-group-member']);
-    Route::get('/group/member/check-group/{id}', [GroupController::class, "checkCurrentGroup"])->name('group-member-current-group')->middleware(['can:assign-group-member']);
-    Route::get('/group/member/{id}', [GroupController::class, "getMembers"])->name('group-member')->middleware(['can:assign-group-member']);
-    Route::patch('/group/member/assign/{id}', [GroupController::class, "assignMember"])->name('group-assign-member')->middleware(['can:assign-group-member']);
-    Route::get('/group/member/create/{id}', [GroupController::class, "createNewMember"])->name('group-new-member')->middleware(['can:assign-group-member']);
-    Route::post('/group/member/store/{id}', [GroupController::class, "storeNewMember"])->name('group-member-add')->middleware(['can:assign-group-member']);
+    Route::get('/groups/member/check-group/{id}', [GroupController::class, "checkCurrentGroup"])->name('groups-member-current-group')->middleware(['can:assign-group-member']);
+    Route::get('/groups/member/{id}', [GroupController::class, "getMembers"])->name('groups-member')->middleware(['can:assign-group-member']);
+    Route::patch('/groups/member/assign/{id}', [GroupController::class, "assignMember"])->name('groups-assign-member')->middleware(['can:assign-group-member']);
+    Route::get('/groups/member/create/{id}', [GroupController::class, "createNewMember"])->name('groups-new-member')->middleware(['can:assign-group-member']);
+    Route::post('/groups/member/store/{id}', [GroupController::class, "storeNewMember"])->name('groups-member-add')->middleware(['can:assign-group-member']);
+    
+    // USERS
+    Route::get('/users', [UserController::class, "index"])->name('users')->middleware(['can:view-users']);
 });
 
 

@@ -24,7 +24,39 @@ class VoucherController extends Controller implements ExportVoucherInterface
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function preIndex()
+    {
+        $userId = Auth::user()->id;
+        $userType = Auth::user()->user_type;
+
+        switch ($userType) {
+            case 'user':
+                return $this->index(0);
+                
+                break;
+            case 'group_admin':
+                $groups = $this->modelService->getAdminGroup($userId, true);
+                
+                break;
+            case 'super_admin':
+                $groups = $this->modelService->getAllGroup(true);
+                
+                break;
+            default:
+                $groups = null;
+        }
+
+        return Inertia::render('Vouchers/PreIndex', [
+            'groups' => $groups,
+        ]);
+    }
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index($id)
     {
         $userId = Auth::user()->id;
         $userType = Auth::user()->user_type;
@@ -35,37 +67,74 @@ class VoucherController extends Controller implements ExportVoucherInterface
         $showGroup = false;
         $addIsOnLimit = false;
 
-        switch ($userType) {
-            case 'user':
-                $allowedToAdd = true;
-                $allowedToDelete = true;
-
-                $userGroup = $this->modelService->getUserGroup($userId);
-                $userVouchers = $this->modelService->getUserVoucher($userId);
-
-                $vouchers = $userVouchers['vouchers'];
-                $addIsOnLimit = $userVouchers['limit'];
-                
-                break;
-            case 'group_admin':
-                $showOwner = true;
-                $showGroup = true;
-                
-                $userVouchersByGroups = $this->modelService->getUserVoucherByGroups($userId);
-                $vouchers = $userVouchersByGroups['vouchers'];
-                $groups = $userVouchersByGroups['groups'];
-                
-                break;
-            case 'super_admin':
-                $showOwner = true;
-                $showGroup = true;
-                
-                $userVouchersByGroups = $this->modelService->getAllUserVouchers();
-                $vouchers = $userVouchersByGroups['vouchers'];
-                
-                break;
-            default:
-                $vouchers = null;
+        if ($id == 0) {
+            switch ($userType) {
+                case 'user':
+                    $allowedToAdd = true;
+                    $allowedToDelete = true;
+    
+                    $userGroup = $this->modelService->getUserGroup($userId);
+                    $userVouchers = $this->modelService->getUserVoucher($userId);
+    
+                    $vouchers = $userVouchers['vouchers'];
+                    $addIsOnLimit = $userVouchers['limit'];
+                    
+                    break;
+                case 'group_admin':
+                    $showOwner = true;
+                    $showGroup = true;
+                    
+                    $userVouchersByGroups = $this->modelService->getUserVoucherByGroups($userId);
+                    $vouchers = $userVouchersByGroups['vouchers'];
+                    $groups = $this->modelService->getAdminGroup($userId);
+                    
+                    break;
+                case 'super_admin':
+                    $showOwner = true;
+                    $showGroup = true;
+                    
+                    $userVouchersByGroups = $this->modelService->getAllUserVouchers();
+                    $vouchers = $userVouchersByGroups['vouchers'];
+                    $groups = $this->modelService->getAllGroup();
+                    
+                    break;
+                default:
+                    $vouchers = null;
+            }
+        } else {
+            switch ($userType) {
+                case 'user':
+                    $allowedToAdd = true;
+                    $allowedToDelete = true;
+    
+                    $userGroup = $this->modelService->getUserGroup($userId);
+                    $userVouchers = $this->modelService->getUserVoucher($userId);
+    
+                    $vouchers = $userVouchers['vouchers'];
+                    $addIsOnLimit = $userVouchers['limit'];
+                    
+                    break;
+                case 'group_admin':
+                    $showOwner = true;
+                    $showGroup = true;
+                    
+                    $userVouchersByGroups = $this->modelService->getUserVoucherByGroups($userId, $id);
+                    $vouchers = $userVouchersByGroups['vouchers'];
+                    $groups = $this->modelService->getAdminGroup($userId);
+                    
+                    break;
+                case 'super_admin':
+                    $showOwner = true;
+                    $showGroup = true;
+                    
+                    $userVouchersByGroups = $this->modelService->getAllUserVouchers($id);
+                    $vouchers = $userVouchersByGroups['vouchers'];
+                    $groups = $this->modelService->getAllGroup();
+                    
+                    break;
+                default:
+                    $vouchers = null;
+            }
         }
 
         return Inertia::render('Vouchers/Index', [
@@ -107,7 +176,7 @@ class VoucherController extends Controller implements ExportVoucherInterface
             return redirect()->route('vouchers-create')->withErrors($store['message']->getMessage(), 'error');
         }
 
-        return redirect()->route('vouchers-index');
+        return redirect()->route('vouchers-preindex');
     }
 
     /**
@@ -159,24 +228,23 @@ class VoucherController extends Controller implements ExportVoucherInterface
                 'Error' => $remove
             ]);
 
-            return redirect()->route('vouchers-index')->withErrors($remove['message']->getMessage(), 'error');
+            return redirect()->route('vouchers-preindex')->withErrors($remove['message']->getMessage(), 'error');
         }
 
-        return redirect()->route('vouchers-index');
+        return response(["status" => $remove['success']], 200);
     }
 
-    public function export()
+    public function export($id)
     {
-        $userId = Auth::user()->id;
         $userType = Auth::user()->user_type;
-
+        
         switch ($userType) {
             case 'group_admin':
-                $fileName = $this->modelService->exportUserVoucherByGroups($userId);
+                $fileName = $this->modelService->exportUserVoucherByGroups($id);
 
                 break;
             case 'super_admin':
-                $fileName = $this->modelService->exportAllUserVouchers();
+                $fileName = $this->modelService->exportAllUserVouchers($id);
                 
                 break;
             default:

@@ -30,7 +30,7 @@ const Toast = Swal.mixin({
 });
 
 function assignMembers(id) {
-    router.get(route('group-member', id));
+    router.get(route('groups-member', id));
 }
 </script>
 

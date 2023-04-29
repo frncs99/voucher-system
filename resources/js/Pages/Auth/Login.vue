@@ -20,17 +20,21 @@ const form = useForm({
 });
 
 const submit = () => {
+    let loginRoute = (currentRoute == '/admin/login') ? route('admin-login') : route('login');
     form.transform(data => ({
         ...data,
         remember: form.remember ? 'on' : '',
-    })).post(route('login'), {
+    })).post(loginRoute, {
         onFinish: () => form.reset('password'),
     });
 };
+
+const currentRoute = window.location.pathname;
 </script>
 
 <template>
-    <Head title="Log in" />
+    <Head v-if="currentRoute == '/admin/login'" title="Admin Log in" />
+    <Head v-else title="Log in" />
 
     <AuthenticationCard>
         <template #logo>
@@ -43,7 +47,8 @@ const submit = () => {
 
         <form @submit.prevent="submit">
             <div>
-                <InputLabel for="email" value="Email" />
+                <InputLabel v-if="currentRoute == '/admin/login'" for="email" value="Admin Email" />
+                <InputLabel v-else for="email" value="User Email" />
                 <TextInput
                     id="email"
                     v-model="form.email"
