@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Auth\AdminAuthenticateSessionController;
+use App\Http\Controllers\Auth\UserAuthenticateSessionController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\UserController;
@@ -28,11 +30,32 @@ Route::get('/', function () {
     ]);
 });
 
+// USER LOGIN ROUTE
+Route::get('/login', [UserAuthenticateSessionController::class, 'create'])
+    ->middleware(['guest:'.config('fortify.guard')])
+    ->name('login');
+Route::post('/login', [UserAuthenticateSessionController::class, 'store'])
+    ->middleware(array_filter([
+        'guest:'.config('fortify.guard'),
+        config('fortify.limiters.login') ? 'throttle:'.config('fortify.limiters.login') : null,
+    ]));
+
+// ADMIN LOGIN ROUTE
+Route::get('/admin/login', [AdminAuthenticateSessionController::class, 'create'])
+    ->middleware(['guest:'.config('fortify.guard')])
+    ->name('admin-login');
+Route::post('/admin/login', [AdminAuthenticateSessionController::class, 'store'])
+    ->middleware(array_filter([
+        'guest:'.config('fortify.guard'),
+        config('fortify.limiters.login') ? 'throttle:'.config('fortify.limiters.login') : null,
+    ]));
+
 Route::middleware([
     'auth:sanctum',
     config('jetstream.auth_session'),
     'verified',
 ])->group(function () {
+    // DASHBOARD
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // VOUCHERS

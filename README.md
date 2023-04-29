@@ -29,8 +29,9 @@ Go to http://127.0.0.1:8000/
 Use the following credentials (seeded data)
 - Super Admin Email: `superadmin@example.com`
 - Group Admin Email: `groupadmin_01@example.com` or `groupadmin_02@example.com`
+- User Email: Kindly check/view the seeded users email using the Admin Account under Users Menu
 
-All seeded users have
+All seeded users (admin and not) have
 - Password: `password`
 
 #### PROJECT TECHNOLOGIES
@@ -41,6 +42,5 @@ All seeded users have
 - Tailwind CSS
 
 #### COMING SOON
-- Separate Log in Page for User and Admin
 - Unit Testing
 - Broadcasting for real time changes
