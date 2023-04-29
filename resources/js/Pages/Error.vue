@@ -9,10 +9,10 @@ const title = computed(() => {
     return {
         401: "401: Unauthorized",
         403: "403: Forbidden",
-        404: "404: Page Not Found",
+        404: "404: Not Found",
         419: "419: Page Expired",
         500: "500: Server Error",
-        503: "503: Service Unavailable",
+        503: "503: Unavailable",
     }[props.status];
 });
 
