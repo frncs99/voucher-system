@@ -31,7 +31,7 @@ class VoucherController extends Controller implements ExportVoucherInterface
 
         switch ($userType) {
             case 'user':
-                $groups = [$this->modelService->getUserGroup($userId)->name ?? null];
+                return $this->index(0);
                 
                 break;
             case 'group_admin':
